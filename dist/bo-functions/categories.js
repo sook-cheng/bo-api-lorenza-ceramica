@@ -5,7 +5,7 @@ const getAllCategories = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows, fields] = await connection.query('SELECT * FROM categories ORDER BY mainCategoryId, sequence;');
+        const [rows, fields] = await connection.query('SELECT * FROM categories ORDER BY mainCategoryId, id;');
         const mainCategories = rows.filter((x) => !x.mainCategoryId);
         value = mainCategories.map((x) => {
             return {

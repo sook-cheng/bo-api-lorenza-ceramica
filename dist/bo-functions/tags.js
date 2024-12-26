@@ -5,7 +5,7 @@ const getAllTags = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows, fields] = await connection.query('SELECT * FROM tags ORDER BY mainTagId, sequence;');
+        const [rows, fields] = await connection.query('SELECT * FROM tags ORDER BY mainTagId, id;');
         const mainTags = rows.filter((x) => !x.mainTagId);
         value = mainTags.map((x) => {
             return {

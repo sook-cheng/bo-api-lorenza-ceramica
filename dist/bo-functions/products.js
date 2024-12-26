@@ -59,7 +59,7 @@ const addProducts = async (fastify, data) => {
         }
         res = result?.insertId ? {
             code: 201,
-            message: "Product created."
+            message: `Product created. Created product Id: ${result.insertId}`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -95,6 +95,7 @@ const assignProductToCategories = async (fastify, data) => {
                 args = args.concat(`${id},`);
             }
         }
+        args = args.substring(0, args.length - 1);
         let sql = "INSERT INTO productsCategories (productId,categoryId)";
         sql += `SELECT ${data.productId}, c.id FROM categories c WHERE c.id IN (${args});`;
         const [result] = await connection.execute(sql);
@@ -136,6 +137,7 @@ const assignProductToTags = async (fastify, data) => {
                 args = args.concat(`${id},`);
             }
         }
+        args = args.substring(0, args.length - 1);
         let sql = "INSERT INTO productsTags (productId,tagId)";
         sql += `SELECT ${data.productId}, t.id FROM tags t WHERE t.id IN (${args});`;
         const [result] = await connection.execute(sql);
@@ -164,29 +166,27 @@ const getProducts = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value = [];
     try {
-        const [rows, fields] = await connection.query(`
-            SELECT DISTINCT p.* 
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'productName\', pi.productName, \'productCode\', pi.productCode, \'sequence\', pi.sequence, \'type\', pi.type)) AS images
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'productName\', pi2.productName, \'productCode\', pi2.productCode, \'sequence\', pi2.sequence, \'type\', pi2.type)) AS mockedImages
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'categoryId\', c.Id, \'categoryName\', c.name)) AS categories
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'tagId\', t.Id, \'tagName\', t.name)) AS tags
-            FROM products p
-            LEFT JOIN productsImages pi ON pi.productId = p.id AND pi.isMocked = 0
-            LEFT JOIN productsImages pi2 ON pi2.productId = p.id AND pi2.isMocked = 1
-            LEFT JOIN productsCategories pc ON pc.productId = p.id
-            JOIN categories c ON c.id = pc.categoryId
-            LEFT JOIN productsTags pt ON pt.productId = p.id
-            JOIN tags t ON t.id = pt.tagId;`);
+        const [rows, fields] = await connection.execute('SELECT DISTINCT * FROM products');
         if (rows.length > 0) {
+            const productIds = rows.map((x) => x.id);
+            let args = '';
+            for (const id of productIds) {
+                args = args.concat(`${id},`);
+            }
+            args = args.substring(0, args.length - 1);
+            const [images, iFields] = await connection.query(`SELECT * FROM productsImages WHERE productId IN (${args}) AND isMocked = 0 ORDER BY productId;`);
+            const [mockedImages, miFields] = await connection.query(`SELECT * FROM productsImages WHERE productId IN (${args}) AND isMocked = 1 ORDER BY productId;`);
+            const [categories, cFields] = await connection.query(`SELECT pc.categoryId, pc.productId, c.name FROM productsCategories pc JOIN categories c ON c.id = pc.categoryId WHERE pc.productId IN (${args}) ORDER BY productId;`);
+            const [tags, tFields] = await connection.query(`SELECT pt.tagId, pt.productId, t.name FROM productsTags pt JOIN tags t ON t.id = pt.tagId WHERE pt.productId IN (${args}) ORDER BY productId;`);
             value = rows.map((x) => {
-                const imgs = x.images.filter((y) => y.productName && y.productCode);
+                const imgs = images.filter((y) => y.productId === x.id);
                 const imgList = imgs.length > 0 ? imgs.map((z) => (0, exports.formatImageUrl)(z.productName, z.productCode, z.sequence, z.type)) : [];
-                const mockedImgs = x.mockedImages.filter((y) => y.productName && y.productCode);
+                const mockedImgs = mockedImages.filter((y) => y.productId === x.id);
                 const mockedImgList = mockedImgs.length > 0 ? mockedImgs.map((z) => (0, exports.formatImageUrl)(z.productName, z.productCode, z.sequence, z.type)) : [];
-                const categories = x.categories.filter((y) => y.categoryId && y.categoryName);
-                const categoryList = categories.length > 0 ? categories : [];
-                const tags = x.tags.filter((y) => y.tagId && y.tagName);
-                const tagList = tags.length > 0 ? tags : [];
+                const prdCats = categories.filter((y) => y.productId === x.id);
+                const categoryList = prdCats.length > 0 ? prdCats : [];
+                const prdTags = tags.filter((y) => y.productId === x.id);
+                const tagList = prdTags.length > 0 ? prdTags : [];
                 return {
                     id: x.id,
                     name: x.name,
@@ -205,6 +205,9 @@ const getProducts = async (fastify) => {
             });
         }
     }
+    catch (err) {
+        console.log(err);
+    }
     finally {
         connection.release();
         return value;
@@ -215,27 +218,14 @@ const getProductDetailsById = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows, fields] = await connection.query(`
-            SELECT p.* 
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'productName\', pi.productName, \'productCode\', pi.productCode, \'sequence\', pi.sequence, \'type\', pi.type)) AS images
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'productName\', pi2.productName, \'productCode\', pi2.productCode, \'sequence\', pi2.sequence, \'type\', pi2.type)) AS mockedImages
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'categoryId\', c.Id, \'categoryName\', c.name)) AS categories
-                ,JSON_ARRAYAGG(JSON_OBJECT(\'tagId\', t.Id, \'tagName\', t.name)) AS tags
-            FROM products p
-            LEFT JOIN productsImages pi ON pi.productId = p.id AND pi.isMocked = 0
-            LEFT JOIN productsImages pi2 ON pi2.productId = p.id AND pi2.isMocked = 1
-            LEFT JOIN productsCategories pc ON pc.productId = p.id
-            JOIN categories c ON c.id = pc.categoryId
-            LEFT JOIN productsTags pt ON pt.productId = p.id
-            JOIN tags t ON t.id = pt.tagId
-            WHERE p.Id = ${id};`);
-        const images = rows[0].images.filter((y) => y.productName && y.productCode);
+        const [rows, fields] = await connection.query(`SELECT DISTINCT * FROM products WHERE Id =?;`, [id]);
+        const [images, iFields] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 0;`, [id]);
+        const [mockedImages, miFields] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 1;`, [id]);
+        const [categories, cFields] = await connection.query(`SELECT pc.categoryId, pc.productId, c.name FROM productsCategories pc JOIN categories c ON c.id = pc.categoryId WHERE pc.productId =?;`, [id]);
+        const [tags, tFields] = await connection.query(`SELECT pt.tagId, pt.productId, t.name FROM productsTags pt JOIN tags t ON t.id = pt.tagId WHERE pt.productId =?;`, [id]);
         const imgList = images.length > 0 ? images.map((z) => (0, exports.formatImageUrl)(z.productName, z.productCode, z.sequence, z.type)) : [];
-        const mockedImages = rows[0].mockedImages.filter((y) => y.productName && y.productCode);
         const mockedImgList = mockedImages.length > 0 ? mockedImages.map((z) => (0, exports.formatImageUrl)(z.productName, z.productCode, z.sequence, z.type)) : [];
-        const categories = rows[0].categories.filter((y) => y.categoryId && y.categoryName);
         const categoryList = categories.length > 0 ? categories : [];
-        const tags = rows[0].tags.filter((y) => y.tagId && y.tagName);
         const tagList = tags.length > 0 ? tags : [];
         value = {
             id: rows[0].id,
@@ -252,6 +242,9 @@ const getProductDetailsById = async (fastify, id) => {
             categories: categoryList,
             tags: tagList,
         };
+    }
+    catch (err) {
+        console.log(err);
     }
     finally {
         connection.release();
