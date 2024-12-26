@@ -5,7 +5,7 @@ export const getAllTags = async (fastify: FastifyInstance) => {
     let value: any;
     
     try{
-        const [rows, fields] = await connection.query('SELECT * FROM tags ORDER BY mainTagId, sequence;');
+        const [rows, fields] = await connection.query('SELECT * FROM tags ORDER BY mainTagId, id;');
         const mainTags: any[] = rows.filter((x: any) => !x.mainTagId);
         value = mainTags.map((x: any) => {
             return {

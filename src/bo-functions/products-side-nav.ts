@@ -73,7 +73,7 @@ export const insertNewProductsSideNav = async (fastify: FastifyInstance, data: a
         const [result] = await connection.execute(sql);
         res = result?.insertId ? {
             code: 201,
-            message: "Product Side Navs created."
+            message: `Product Side Navs created. Inserted side nav Id: ${result.insertId}`
         } : {
             code: 500,
             message: "Internal Server Error."
