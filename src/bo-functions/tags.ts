@@ -1,5 +1,18 @@
 import { FastifyInstance } from "fastify";
 
+/**
+ * 
+ * @param fastify 
+ * @returns {
+ *  id: number
+ *  name: string
+ *  description: string
+ *  mainTagId?: number
+ *  createdAt: Date
+ *  updatedAt: Date
+ *  subTags: any[]
+ * }
+*/
 export const getAllTags = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;

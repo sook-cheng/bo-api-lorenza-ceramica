@@ -28,6 +28,20 @@ export const getMainProductsSideNavs = async (fastify: FastifyInstance) => {
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @returns {
+ *  id: number,
+ *  name: string,
+ *  path: string,
+ *  tableName: string,
+ *  sequence: number,
+ *  mainSideNavId: number,
+ *  createdAt: Date,
+ *  updatedAt: Date,
+ * }
+*/
 export const getSubProductsSideNavsByMainId = async (fastify: FastifyInstance, mainSideNavId: number) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;
@@ -42,6 +56,21 @@ export const getSubProductsSideNavsByMainId = async (fastify: FastifyInstance, m
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @returns {
+ *  id: number,
+ *  name: string,
+ *  path: string,
+ *  tableName: string,
+ *  sequence: number,
+ *  mainSideNavId: number,
+ *  createdAt: Date,
+ *  updatedAt: Date,
+ *  subNavs: any[]
+ * }
+*/
 export const getAllProductsSideNavs = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;
@@ -62,6 +91,21 @@ export const getAllProductsSideNavs = async (fastify: FastifyInstance) => {
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  name: string,
+ *  path: string,
+ *  tableName: string,
+ *  sequence: number,
+ *  mainSideNavId: number
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+*/
 export const insertNewProductsSideNav = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
@@ -92,6 +136,22 @@ export const insertNewProductsSideNav = async (fastify: FastifyInstance, data: a
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  id: number,
+ *  name: string,
+ *  path: string,
+ *  tableName: string,
+ *  sequence: number,
+ *  mainSideNavId: number
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+*/
 export const updateProductsSideNav = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };

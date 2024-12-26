@@ -4,7 +4,6 @@ import { FastifyInstance } from "fastify";
  * 
  * @param fastify 
  * @param data {
- *  id: number
  *  name: string
  *  code?: string
  *  description?: string
@@ -13,8 +12,10 @@ import { FastifyInstance } from "fastify";
  *  size?: string
  *  finish?: string
  *  thickness?: string
- *  createdAt: Date
- *  updatedAt: Date
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
  * }
  */
 export const addProducts = async (fastify: FastifyInstance, data: any) => {
@@ -84,6 +85,18 @@ export const addProducts = async (fastify: FastifyInstance, data: any) => {
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  productId: number
+ *  categories: number[]
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+*/
 export const assignProductToCategories = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
@@ -128,6 +141,18 @@ export const assignProductToCategories = async (fastify: FastifyInstance, data: 
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  productId: number
+ *  tags: number[]
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+*/
 export const assignProductToTags = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
@@ -172,12 +197,39 @@ export const assignProductToTags = async (fastify: FastifyInstance, data: any) =
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @returns {
+ *  id: number
+ *  name: string
+ *  code?: string
+ *  description?: string
+ *  variation?: string
+ *  color?: string
+ *  size?: string
+ *  finish?: string
+ *  thickness?: string
+ *  images: string[]
+ *  mockedImages: string[]
+ *  categories: { 
+ *      categoryId: number, 
+ *      productId: number, 
+ *      name: string 
+ *  }[]
+ * tags: { 
+ *      tagId: number, 
+ *      productId: number, 
+ *      name: string 
+ *  }[]
+ * }
+*/
 export const  getProducts = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any = [];
 
     try {
-        const [rows, fields] = await connection.execute('SELECT DISTINCT * FROM products');
+        const [rows, fields] = await connection.execute('SELECT DISTINCT * FROM products;');
 
         if (rows.length > 0) {
             const productIds: number[] = rows.map((x: any) => x.id);
@@ -228,6 +280,34 @@ export const  getProducts = async (fastify: FastifyInstance) => {
     }
 }
 
+/**
+ * 
+ * @param fastify 
+ * @param id
+ * @returns {
+ *  id: number
+ *  name: string
+ *  code?: string
+ *  description?: string
+ *  variation?: string
+ *  color?: string
+ *  size?: string
+ *  finish?: string
+ *  thickness?: string
+ *  images: string[]
+ *  mockedImages: string[]
+ *  categories: { 
+ *      categoryId: number, 
+ *      productId: number, 
+ *      name: string 
+ *  }[]
+ * tags: { 
+ *      tagId: number, 
+ *      productId: number, 
+ *      name: string 
+ *  }[]
+ * }
+*/
 export const getProductDetailsById = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;
