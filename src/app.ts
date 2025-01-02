@@ -1,6 +1,6 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { boFunctionsRoutes } from './routes';
+import { categoriesRoute, colorsRoute, productsRoute, productsSideNavsRoute, tagsRoute } from './routes';
 import dotenv from 'dotenv';
 import fastifyMysql from '@fastify/mysql';
 import fastifyMultipart from '@fastify/multipart';
@@ -23,7 +23,13 @@ server.register(cors, {
 });
 
 server.register(fastifyMultipart);
-server.register(boFunctionsRoutes);
+
+// routes
+server.register(categoriesRoute);
+server.register(colorsRoute);
+server.register(productsRoute);
+server.register(productsSideNavsRoute);
+server.register(tagsRoute);
 
 server.listen({ host: '127.0.0.1', port: 8080 }, (err, address) => {
     if (err) {

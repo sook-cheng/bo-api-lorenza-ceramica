@@ -9,8 +9,8 @@ import { FastifyInstance } from "fastify";
  *  description?: string
  *  variation?: string
  *  color?: string
- *  size?: string
- *  finish?: string
+ *  size?: number
+ *  finish?: number
  *  thickness?: string
  * }
  * @returns {
@@ -18,13 +18,15 @@ import { FastifyInstance } from "fastify";
  *  message: string,
  * }
  */
-export const addProducts = async (fastify: FastifyInstance, data: any) => {
+export const addProduct = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
+    let sizeStr = null;
+    let finishStr = null;
 
     try {
         let checkSql = `SELECT p.id FROM products p WHERE p.name = \'${data.name}\' AND (p.code = \'${data.code}\' OR p.color = \'${data.color}\');`
-        const [rows, fields] = await connection.query(checkSql);
+        const [rows] = await connection.query(checkSql);
 
         if (rows && rows.length > 0) {
             if (rows[0].id) {
@@ -36,8 +38,18 @@ export const addProducts = async (fastify: FastifyInstance, data: any) => {
             }
         }
 
-        let sql = "INSERT INTO products (name,code,description,variation,color,size,finish,thickness) VALUES";
-        sql += `('${data.name}','${data.code}','${data.description}','${data.variation}','${data.color}','${data.size}','${data.finish}','${data.thickness}');`
+        if (data.size) {
+            const [sizes] = await connection.query('SELECT name, value FROM sizes WHERE id=?', [data.size]);
+            sizeStr = sizes[0].value;
+        }
+
+        if (data.finish) {
+            const [finishes] = await connection.query('SELECT name, value FROM finishes WHERE id=?', [data.finish]);
+            finishStr = finishes[0].name;
+        }
+
+        let sql = "INSERT INTO products (name,code,description,variation,color,size,finish,thickness) VALUES ";
+        sql += `('${data.name}','${data.code}','${data.description}','${data.variation}','${data.color}','${sizeStr}','${finishStr}','${data.thickness}');`
         sql = sql.replaceAll("'null'", "null");
         // result
         // {
@@ -47,21 +59,17 @@ export const addProducts = async (fastify: FastifyInstance, data: any) => {
         console.log("Inserted productId", result.insertId);
 
         if (data.color) {
-            let cSql = "INSERT INTO productsColors (productId,colorId)";
-            cSql += `SELECT p.id, c.id FROM products p, colors c WHERE p.name = \'${data.name}\' AND (p.code = \'${data.code}\' OR p.color = \'${data.color}\') AND c.name = '${data.color}';`
-            const [result] = await connection.execute(cSql);
+            let cSql = "INSERT INTO productsColors (productId,colorId) ";
+            cSql += `SELECT ${result.insertId}, id FROM colors WHERE name = '${data.color}';`
+            await connection.execute(cSql);
         }
 
         if (data.size) {
-            let sSql = "INSERT INTO productsSizes (productId,sizeId)";
-            sSql += `SELECT p.id, s.id FROM products p, sizes s WHERE p.name = \'${data.name}\' AND (p.code = \'${data.code}\' OR p.color = \'${data.color}\') AND s.value = '${data.size}';`
-            const [result] = await connection.execute(sSql);
+            await connection.execute('INSERT INTO productsSizes (productId,sizeId) VALUES (?,?)', [result.insertId, data.size]);
         }
 
         if (data.finish) {
-            let fSql = "INSERT INTO productsFinishes (productId,finishId)";
-            fSql += `SELECT p.id, f.id FROM products p, finishes f WHERE p.name = \'${data.name}\' AND (p.code = \'${data.code}\' OR p.color = \'${data.color}\') AND f.name = '${data.finish}';`
-            const [result] = await connection.execute(fSql);
+            await connection.execute('INSERT INTO productsFinishes (productId,finishId) VALUES (?,?)', [result.insertId, data.finish]);
         }
 
         res = result?.insertId ? {
@@ -72,7 +80,7 @@ export const addProducts = async (fastify: FastifyInstance, data: any) => {
             message: "Internal Server Error."
         };
     }
-    catch(err) {
+    catch (err) {
         console.log(err);
         res = {
             code: 500,
@@ -103,32 +111,28 @@ export const assignProductToCategories = async (fastify: FastifyInstance, data: 
 
     try {
         let args = '';
-        for (const id of data.categories) {
-            const checkSql = `SELECT productId, categoryId FROM productsCategories WHERE productId = ${data.productId} AND categoryId = ${id};`
-            const [rows, fields] = await connection.query(checkSql);
-            if (rows && rows.length > 0) {
-                if (rows[0].productId === data.productId && rows[0].categoryId === id) {
-                    continue;
-                }
-            }
-            else {
-                args = args.concat(`${id},`);
-            }
+        const [rows] = await connection.query('SELECT categoryId FROM productsCategories WHERE productId=?', [data.productId]);
+        const categories = data.categories.filter((id: number) => !rows.find((x: any) => x.categoryId === id));
+        
+        for (const id of categories) {
+            args = args.concat(`${id},`);
         }
 
-        args = args.substring(0, args.length - 1);
-        let sql = "INSERT INTO productsCategories (productId,categoryId)";
-        sql += `SELECT ${data.productId}, c.id FROM categories c WHERE c.id IN (${args});`
-        const [result] = await connection.execute(sql);
-        res = result?.insertId ? {
-            code: 201,
-            message: "Product Categories assigned."
-        } : {
-            code: 500,
-            message: "Internal Server Error."
-        };
+        if (args.length > 0) {
+            args = args.substring(0, args.length - 1);
+            let sql = "INSERT INTO productsCategories (productId,categoryId) ";
+            sql += `SELECT ${data.productId}, c.id FROM categories c WHERE c.id IN (${args});`
+            const [result] = await connection.execute(sql);
+            res = result?.insertId ? {
+                code: 201,
+                message: "Product Categories assigned."
+            } : {
+                code: 500,
+                message: "Internal Server Error."
+            };
+        }
     }
-    catch(err) {
+    catch (err) {
         console.log(err);
         res = {
             code: 500,
@@ -159,32 +163,323 @@ export const assignProductToTags = async (fastify: FastifyInstance, data: any) =
 
     try {
         let args = '';
+        const [rows] = await connection.query('SELECT tagId FROM productsTags WHERE productId=?', [data.productId]);
+        const tags = data.tags.filter((id: number) => !rows.find((x: any) => x.tagId === id));
+
+        for (const id of tags) {
+            args = args.concat(`${id},`);
+        }
+
+        if (args.length > 0) {
+            args = args.substring(0, args.length - 1);
+            let sql = "INSERT INTO productsTags (productId,tagId) ";
+            sql += `SELECT ${data.productId}, t.id FROM tags t WHERE t.id IN (${args});`
+            const [result] = await connection.execute(sql);
+            res = result?.insertId ? {
+                code: 201,
+                message: "Product Tags assigned."
+            } : {
+                code: 500,
+                message: "Internal Server Error."
+            };
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  productId: number
+ *  categories: number[]
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+*/
+export const removeCategoriesForProduct = async (fastify: FastifyInstance, data: any) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        let args = '';
+        for (const id of data.categories) {
+            args = args.concat(`${id},`);
+        }
+
+        if (args.length > 0) {
+            args = args.substring(0, args.length - 1);
+            let sql = "DELETE FROM productsCategories ";
+            sql += `WHERE productId = ${data.productId} AND categoryId IN (${args});`
+            const [result] = await connection.execute(sql);
+            res = result?.affectedRows > 0 ? {
+                code: 204,
+                message: "Product Categories removed."
+            } : {
+                code: 500,
+                message: "Internal Server Error."
+            };
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  productId: number
+ *  tags: number[]
+ * }
+ * @returns {
+*  code: number,
+*  message: string,
+* }
+*/
+export const removeTagsForProduct = async (fastify: FastifyInstance, data: any) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        let args = '';
         for (const id of data.tags) {
-            const checkSql = `SELECT productId, tagId FROM productsTags WHERE productId = ${data.productId} AND tagId = ${id};`
-            const [rows, fields] = await connection.query(checkSql);
-            if (rows && rows.length > 0) {
-                if (rows[0].productId === data.productId && rows[0].tagId === id) {
-                    continue;
+            args = args.concat(`${id},`);
+        }
+
+        if (args.length > 0) {
+            args = args.substring(0, args.length - 1);
+            let sql = "DELETE FROM productsTags ";
+            sql += `WHERE productId = ${data.productId} AND tagId IN (${args});`
+            const [result] = await connection.execute(sql);
+            res = result?.affectedRows > 0 ? {
+                code: 204,
+                message: "Product Tags removed."
+            } : {
+                code: 500,
+                message: "Internal Server Error."
+            };
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  id: number
+ *  name: string
+ *  code?: string
+ *  description?: string
+ *  variation?: string
+ *  color?: string
+ *  size?: number
+ *  finish?: number
+ *  thickness?: string
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+*/
+export const updateProduct = async (fastify: FastifyInstance, data: any) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+    let sizeStr = null;
+    let finishStr = null;
+
+    try {
+        const [rows] = await connection.query('SELECT p.id, p.code, p.color, s.id AS size, f.id AS finish FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish WHERE p.id=?', [data.id]);
+
+        if (rows && rows.length > 0) {
+            if (rows[0].id) {
+                // If code is NULL, color is used as productCode in productsImages
+                // Thus color is not changeable
+                if (data.color && data.color !== rows[0].color) {
+                    if (!rows[0].code) {
+                        res = {
+                            code: 400,
+                            message: "Color is not changeable."
+                        }
+                        return;
+                    }
+
+                    // Remove existing color
+                    await connection.execute('DELETE FROM productsColors WHERE productId=? AND colorId IN (SELECT id FROM colors WHERE name=?)', [rows[0].id, rows[0].color || null]);
+                    // Insert new color
+                    let cSql = "INSERT INTO productsColors (productId,colorId) ";
+                    cSql += `SELECT ${data.id}, id FROM colors WHERE name = '${data.color}';`;
+                    await connection.execute(cSql);
+
+                    await connection.execute("UPDATE products SET color=? WHERE id=?", [data.color || null, data.id]);
                 }
-            }
-            else {
-                args = args.concat(`${id},`);
+
+                if (data.size && data.size !== rows[0].size) {
+                    // Remove existing size
+                    await connection.execute('DELETE FROM productsSizes WHERE productId=? AND sizeId=?', [rows[0].id, rows[0].size]);
+                    // Insert new size
+                    await connection.execute('INSERT INTO productsSizes (productId,sizeId) VALUES (?,?)', [data.id, data.size]);
+                }
+
+                if (data.finish && data.finish !== rows[0].finish) {
+                    // Remove existing finish
+                    await connection.execute('DELETE FROM productsFinishes WHERE productId=? AND finishId=?', [rows[0].id, rows[0].finish]);
+                    // Insert new finish
+                    await connection.execute('INSERT INTO productsFinishes (productId,finishId) VALUES (?,?)', [data.id, data.finish]);
+                }
             }
         }
 
-        args = args.substring(0, args.length - 1);
-        let sql = "INSERT INTO productsTags (productId,tagId)";
-        sql += `SELECT ${data.productId}, t.id FROM tags t WHERE t.id IN (${args});`
-        const [result] = await connection.execute(sql);
-        res = result?.insertId ? {
-            code: 201,
-            message: "Product Tags assigned."
+        if (data.size) {
+            const [sizes] = await connection.query('SELECT name, value FROM sizes WHERE id=?', [data.size]);
+            sizeStr = sizes[0].value;
+        }
+
+        if (data.finish) {
+            const [finishes] = await connection.query('SELECT name, value FROM finishes WHERE id=?', [data.finish]);
+            finishStr = finishes[0].name;
+        }
+
+        const [result] = await connection.execute("UPDATE products SET description=?, variation=?, thickness=?, size=?, finish=? WHERE id=?",
+            [data.description || null, data.variation || null, data.thickness || null, sizeStr, finishStr, data.id]);
+
+        res = result?.affectedRows > 0 ? {
+            code: 204,
+            message: `Product updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
         };
     }
-    catch(err) {
+    catch (err) {
+        console.log(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param id
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+*/
+export const removeProduct = async (fastify: FastifyInstance, id: number) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        await connection.execute('DELETE FROM productsCategories WHERE productId=?', [id]);
+        await connection.execute('DELETE FROM productsColors WHERE productId=?', [id]);
+        await connection.execute('DELETE FROM productsFinishes WHERE productId=?', [id]);
+        await connection.execute('DELETE FROM productsImages WHERE productId=?', [id]);
+        await connection.execute('DELETE FROM productsSizes WHERE productId=?', [id]);
+        await connection.execute('DELETE FROM productsTags WHERE productId=?', [id]);
+
+        const [result] = await connection.execute('DELETE FROM products WHERE id=?', [id]);
+
+        res = result?.affectedRows > 0 ? {
+            code: 204,
+            message: `Product deleted.`
+        } : {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    catch (err) {
+        console.log(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  products: number[]
+ * }
+ * @returns {
+*  code: number,
+*  message: string,
+* }
+*/
+export const removeProducts = async (fastify: FastifyInstance, data: any) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        let args = '';
+        for (const id of data.products) {
+            args = args.concat(`${id},`);
+        }
+        args = args.substring(0, args.length - 1);
+
+        await connection.execute(`DELETE FROM productsCategories WHERE productId IN (${args})`);
+        await connection.execute(`DELETE FROM productsColors WHERE productId IN (${args})`);
+        await connection.execute(`DELETE FROM productsFinishes WHERE productId IN (${args})`);
+        await connection.execute(`DELETE FROM productsImages WHERE productId IN (${args})`);
+        await connection.execute(`DELETE FROM productsSizes WHERE productId IN (${args})`);
+        await connection.execute(`DELETE FROM productsTags WHERE productId IN (${args})`);
+
+        const [result] = await connection.execute(`DELETE FROM products WHERE id IN (${args})`);
+
+        res = result?.affectedRows > 0 ? {
+            code: 204,
+            message: `Products deleted.`
+        } : {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    catch (err) {
         console.log(err);
         res = {
             code: 500,
@@ -224,12 +519,12 @@ export const assignProductToTags = async (fastify: FastifyInstance, data: any) =
  *  }[]
  * }
 */
-export const  getProducts = async (fastify: FastifyInstance) => {
+export const getProducts = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any = [];
 
     try {
-        const [rows, fields] = await connection.execute('SELECT DISTINCT * FROM products;');
+        const [rows] = await connection.execute('SELECT DISTINCT * FROM products;');
 
         if (rows.length > 0) {
             const productIds: number[] = rows.map((x: any) => x.id);
@@ -238,10 +533,10 @@ export const  getProducts = async (fastify: FastifyInstance) => {
                 args = args.concat(`${id},`);
             }
             args = args.substring(0, args.length - 1);
-            const [images, iFields] = await connection.query(`SELECT * FROM productsImages WHERE productId IN (${args}) AND isMocked = 0 ORDER BY productId;`);
-            const [mockedImages, miFields] = await connection.query(`SELECT * FROM productsImages WHERE productId IN (${args}) AND isMocked = 1 ORDER BY productId;`);
-            const [categories, cFields] = await connection.query(`SELECT pc.categoryId, pc.productId, c.name FROM productsCategories pc JOIN categories c ON c.id = pc.categoryId WHERE pc.productId IN (${args}) ORDER BY productId;`);
-            const [tags, tFields] = await connection.query(`SELECT pt.tagId, pt.productId, t.name FROM productsTags pt JOIN tags t ON t.id = pt.tagId WHERE pt.productId IN (${args}) ORDER BY productId;`);
+            const [images] = await connection.query(`SELECT * FROM productsImages WHERE productId IN (${args}) AND isMocked = 0 ORDER BY productId;`);
+            const [mockedImages] = await connection.query(`SELECT * FROM productsImages WHERE productId IN (${args}) AND isMocked = 1 ORDER BY productId;`);
+            const [categories] = await connection.query(`SELECT pc.categoryId, pc.productId, c.name FROM productsCategories pc JOIN categories c ON c.id = pc.categoryId WHERE pc.productId IN (${args}) ORDER BY productId;`);
+            const [tags] = await connection.query(`SELECT pt.tagId, pt.productId, t.name FROM productsTags pt JOIN tags t ON t.id = pt.tagId WHERE pt.productId IN (${args}) ORDER BY productId;`);
 
             value = rows.map((x: any) => {
                 const imgs = images.filter((y: any) => y.productId === x.id);
@@ -252,7 +547,7 @@ export const  getProducts = async (fastify: FastifyInstance) => {
                 const categoryList = prdCats.length > 0 ? prdCats : [];
                 const prdTags = tags.filter((y: any) => y.productId === x.id);
                 const tagList = prdTags.length > 0 ? prdTags : [];
-                
+
                 return {
                     id: x.id,
                     name: x.name,
@@ -271,7 +566,7 @@ export const  getProducts = async (fastify: FastifyInstance) => {
             });
         }
     }
-    catch(err) {
+    catch (err) {
         console.log(err);
     }
     finally {
@@ -311,29 +606,29 @@ export const  getProducts = async (fastify: FastifyInstance) => {
 export const getProductDetailsById = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;
-    
-    try{
-        const [rows, fields] = await connection.query(`SELECT DISTINCT * FROM products WHERE Id =?;`, [id]);
 
-        const [images, iFields] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 0;`, [id]);
-        const [mockedImages, miFields] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 1;`, [id]);
-        const [categories, cFields] = await connection.query(`SELECT pc.categoryId, pc.productId, c.name FROM productsCategories pc JOIN categories c ON c.id = pc.categoryId WHERE pc.productId =?;`, [id]);
-        const [tags, tFields] = await connection.query(`SELECT pt.tagId, pt.productId, t.name FROM productsTags pt JOIN tags t ON t.id = pt.tagId WHERE pt.productId =?;`, [id]);
+    try {
+        const [rows] = await connection.query(`SELECT DISTINCT * FROM products WHERE Id =?;`, [id]);
+
+        const [images] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 0;`, [id]);
+        const [mockedImages] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 1;`, [id]);
+        const [categories] = await connection.query(`SELECT pc.categoryId, pc.productId, c.name FROM productsCategories pc JOIN categories c ON c.id = pc.categoryId WHERE pc.productId =?;`, [id]);
+        const [tags] = await connection.query(`SELECT pt.tagId, pt.productId, t.name FROM productsTags pt JOIN tags t ON t.id = pt.tagId WHERE pt.productId =?;`, [id]);
 
         const imgList = images.length > 0 ? images.map((z: any) => formatImageUrl(z.productName, z.productCode, z.sequence, z.type)) : [];
         const mockedImgList = mockedImages.length > 0 ? mockedImages.map((z: any) => formatImageUrl(z.productName, z.productCode, z.sequence, z.type)) : [];
         const categoryList = categories.length > 0 ? categories : [];
         const tagList = tags.length > 0 ? tags : [];
-        
+
         value = {
             id: rows[0].id,
-            prdName: rows[0].name,
-            prdCode: rows[0].code ?? '-',
-            prdDesc: rows[0].description,
-            prdSize: rows[0].size ?? '-',
-            prdVariation: rows[0].variation ?? '-',
-            prdColor: rows[0].color ?? '-',
-            prdFinish: rows[0].finish ?? '-',
+            name: rows[0].name,
+            code: rows[0].code ?? '-',
+            description: rows[0].description,
+            size: rows[0].size ?? '-',
+            variation: rows[0].variation ?? '-',
+            color: rows[0].color ?? '-',
+            finish: rows[0].finish ?? '-',
             thickness: rows[0].thickness ?? '-',
             images: imgList,
             mockedImages: mockedImgList,
@@ -341,10 +636,10 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
             tags: tagList,
         };
     }
-    catch(err) {
+    catch (err) {
         console.log(err);
     }
-    finally{
+    finally {
         connection.release();
         return value;
     }
