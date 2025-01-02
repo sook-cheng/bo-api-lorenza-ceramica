@@ -27,8 +27,10 @@ server.register(multipart_1.default);
 // routes
 server.register(routes_1.categoriesRoute);
 server.register(routes_1.colorsRoute);
+server.register(routes_1.finishesRoute);
 server.register(routes_1.productsRoute);
 server.register(routes_1.productsSideNavsRoute);
+server.register(routes_1.sizesRoute);
 server.register(routes_1.tagsRoute);
 server.listen({ host: '127.0.0.1', port: 8080 }, (err, address) => {
     if (err) {

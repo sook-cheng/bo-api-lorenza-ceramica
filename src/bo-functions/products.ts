@@ -664,7 +664,7 @@ export const uploadProductsImages = async (fastify: FastifyInstance, id: number,
 
     try {
         const imgs: any[] = [];
-        const [products] = await connection.query('SELECT p.*, pi.sequence FROM products LEFT JOIN productsImages pi ON pi.productId = p.id WHERE id=?', [id]);
+        const [products] = await connection.query('SELECT p.*, pi.sequence FROM products p LEFT JOIN productsImages pi ON pi.productId = p.id WHERE p.id=?', [id]);
 
         if (!products || products.length === 0) {
             res = {

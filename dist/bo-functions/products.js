@@ -58,7 +58,6 @@ const addProduct = async (fastify, data) => {
         //      fieldCount, affectedRows, insertId, info, serverStatus, warningStatus, changesRows
         // }
         const [result] = await connection.execute(sql);
-        console.log("Inserted productId", result.insertId);
         if (data.color) {
             let cSql = "INSERT INTO productsColors (productId,colorId) ";
             cSql += `SELECT ${result.insertId}, id FROM colors WHERE name = '${data.color}';`;
@@ -622,7 +621,7 @@ const uploadProductsImages = async (fastify, id, images) => {
     let res = { code: 200, message: "OK." };
     try {
         const imgs = [];
-        const [products] = await connection.query('SELECT p.*, pi.sequence FROM products LEFT JOIN productsImages pi ON pi.productId = p.id WHERE id=?', [id]);
+        const [products] = await connection.query('SELECT p.*, pi.sequence FROM products p LEFT JOIN productsImages pi ON pi.productId = p.id WHERE p.id=?', [id]);
         if (!products || products.length === 0) {
             res = {
                 code: 400,
