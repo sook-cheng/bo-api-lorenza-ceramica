@@ -24,7 +24,12 @@ server.register(cors_1.default, {
     }
 });
 server.register(multipart_1.default);
-server.register(routes_1.boFunctionsRoutes);
+// routes
+server.register(routes_1.categoriesRoute);
+server.register(routes_1.colorsRoute);
+server.register(routes_1.productsRoute);
+server.register(routes_1.productsSideNavsRoute);
+server.register(routes_1.tagsRoute);
 server.listen({ host: '127.0.0.1', port: 8080 }, (err, address) => {
     if (err) {
         console.error(err);
