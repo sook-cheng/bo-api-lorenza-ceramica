@@ -136,7 +136,7 @@ export const createCategory = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -178,7 +178,7 @@ export const updateCategory = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -246,7 +246,7 @@ export const addSubCategories = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -328,7 +328,7 @@ export const deleteCategory = async (fastify: FastifyInstance, id: number) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -390,7 +390,7 @@ export const deleteSubCategories = async (fastify: FastifyInstance, data: any) =
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -439,7 +439,7 @@ export const removeProductsFromCategory = async (fastify: FastifyInstance, data:
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."

@@ -137,7 +137,7 @@ export const createTag = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -179,7 +179,7 @@ export const updateTag = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -247,7 +247,7 @@ export const addSubTags = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -329,7 +329,7 @@ export const deleteTag = async (fastify: FastifyInstance, id: number) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -391,7 +391,7 @@ export const deleteSubTags = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -440,7 +440,7 @@ export const removeProductsFromTag = async (fastify: FastifyInstance, data: any)
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."

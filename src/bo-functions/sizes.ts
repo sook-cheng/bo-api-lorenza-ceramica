@@ -95,7 +95,7 @@ export const createSize = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -161,7 +161,7 @@ export const createSizes = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -201,7 +201,7 @@ export const updateSize = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -266,7 +266,7 @@ export const deleteSize = async (fastify: FastifyInstance, id: number) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -328,7 +328,7 @@ export const deleteSizes = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -377,7 +377,7 @@ export const removeProductsFromSize = async (fastify: FastifyInstance, data: any
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."

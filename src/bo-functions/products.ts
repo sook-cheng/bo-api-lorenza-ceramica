@@ -60,7 +60,6 @@ export const addProduct = async (fastify: FastifyInstance, data: any) => {
         //      fieldCount, affectedRows, insertId, info, serverStatus, warningStatus, changesRows
         // }
         const [result] = await connection.execute(sql);
-        console.log("Inserted productId", result.insertId);
 
         if (data.color) {
             let cSql = "INSERT INTO productsColors (productId,colorId) ";
@@ -85,7 +84,7 @@ export const addProduct = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -137,7 +136,7 @@ export const assignProductToCategories = async (fastify: FastifyInstance, data: 
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -189,7 +188,7 @@ export const assignProductToTags = async (fastify: FastifyInstance, data: any) =
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -238,7 +237,7 @@ export const removeCategoriesForProduct = async (fastify: FastifyInstance, data:
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -287,7 +286,7 @@ export const removeTagsForProduct = async (fastify: FastifyInstance, data: any) 
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -388,7 +387,7 @@ export const updateProduct = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -432,7 +431,7 @@ export const removeProduct = async (fastify: FastifyInstance, id: number) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -484,7 +483,7 @@ export const removeProducts = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -571,7 +570,7 @@ export const getProducts = async (fastify: FastifyInstance) => {
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
     }
     finally {
         connection.release();
@@ -641,7 +640,7 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
     }
     finally {
         connection.release();
@@ -704,7 +703,7 @@ export const uploadProductsImages = async (fastify: FastifyInstance, id: number,
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."

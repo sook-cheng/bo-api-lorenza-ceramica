@@ -95,7 +95,7 @@ export const createFinish = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -161,7 +161,7 @@ export const createFinishes = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -201,7 +201,7 @@ export const updateFinish = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -266,7 +266,7 @@ export const deleteFinish = async (fastify: FastifyInstance, id: number) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -328,7 +328,7 @@ export const deleteFinishes = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -377,7 +377,7 @@ export const removeProductsFromFinish = async (fastify: FastifyInstance, data: a
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."

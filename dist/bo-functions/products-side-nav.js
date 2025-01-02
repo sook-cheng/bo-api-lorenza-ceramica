@@ -77,7 +77,7 @@ const insertNewProductsSideNav = async (fastify, data) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -103,7 +103,7 @@ const updateProductsSideNav = async (fastify, data) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."

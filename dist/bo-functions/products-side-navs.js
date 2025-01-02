@@ -135,7 +135,7 @@ const createProductsSideNav = async (fastify, data) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -205,7 +205,7 @@ const updateProductsSideNav = async (fastify, data) => {
         }
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -281,7 +281,7 @@ const addSubProductsSideNavs = async (fastify, data) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -325,7 +325,7 @@ const deleteSideNav = async (fastify, id) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
@@ -388,7 +388,7 @@ const deleteSubSideNavs = async (fastify, data) => {
         };
     }
     catch (err) {
-        console.log(err);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
