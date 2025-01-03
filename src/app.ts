@@ -1,6 +1,6 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
-import { categoriesRoute, colorsRoute, finishesRoute, productsRoute, productsSideNavsRoute, sizesRoute, tagsRoute } from './routes';
+import { aboutUsRoute, categoriesRoute, colorsRoute, faqRoute, finishesRoute, productsImagesRoute, productsRoute, productsSideNavsRoute, sizesRoute, tagsRoute } from './routes';
 import dotenv from 'dotenv';
 import fastifyMysql from '@fastify/mysql';
 import fastifyMultipart from '@fastify/multipart';
@@ -25,10 +25,13 @@ server.register(cors, {
 server.register(fastifyMultipart);
 
 // routes
+server.register(aboutUsRoute);
 server.register(categoriesRoute);
 server.register(colorsRoute);
+server.register(faqRoute);
 server.register(finishesRoute);
 server.register(productsRoute);
+server.register(productsImagesRoute);
 server.register(productsSideNavsRoute);
 server.register(sizesRoute);
 server.register(tagsRoute);

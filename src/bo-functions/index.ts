@@ -1,4 +1,7 @@
+export * from './about-us';
+export * from './faq';
 export * from './products';
+export * from './products-images';
 export * from './products-side-navs';
 export * from './categories';
 export * from './colors';

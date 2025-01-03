@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { addProduct, assignProductToCategories, assignProductToTags, getProductDetailsById, getProducts, removeCategoriesForProduct, removeProduct, removeProducts, removeTagsForProduct, updateProduct, uploadProductsImages } from "../bo-functions";
+import { addProduct, assignProductToCategories, assignProductToTags, getProductDetailsById, getProducts, removeCategoriesForProduct, removeProduct, removeProducts, removeTagsForProduct, updateProduct } from "../bo-functions";
 
 export async function productsRoute(fastify: FastifyInstance) {
     fastify.post("/add-product", async (request, reply) => {
@@ -49,14 +49,6 @@ export async function productsRoute(fastify: FastifyInstance) {
 
     fastify.post("/remove-product-tags", async (request, reply) => {
         const result = await removeTagsForProduct(fastify, request.body);
-        reply.code(result?.code!).send({ message: result?.message });
-    });
-
-    // WIP: Testing on server
-    fastify.post("/upload-products-images/:id", async (request, reply) => {
-        const { id }: any = request.params;
-        const images = request.files();
-        const result = await uploadProductsImages(fastify, id, images);
         reply.code(result?.code!).send({ message: result?.message });
     });
 }
