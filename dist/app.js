@@ -25,10 +25,13 @@ server.register(cors_1.default, {
 });
 server.register(multipart_1.default);
 // routes
+server.register(routes_1.aboutUsRoute);
 server.register(routes_1.categoriesRoute);
 server.register(routes_1.colorsRoute);
+server.register(routes_1.faqRoute);
 server.register(routes_1.finishesRoute);
 server.register(routes_1.productsRoute);
+server.register(routes_1.productsImagesRoute);
 server.register(routes_1.productsSideNavsRoute);
 server.register(routes_1.sizesRoute);
 server.register(routes_1.tagsRoute);
