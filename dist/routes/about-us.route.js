@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.aboutUsRoute = aboutUsRoute;
-const bo_functions_1 = require("src/bo-functions");
+const bo_functions_1 = require("../bo-functions");
 async function aboutUsRoute(fastify) {
     fastify.get("/about-us", async (request, reply) => {
         return await (0, bo_functions_1.getAboutUs)(fastify);

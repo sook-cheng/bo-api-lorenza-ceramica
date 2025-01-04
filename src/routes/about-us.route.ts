@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { getAboutUs, updateAboutUs } from "src/bo-functions";
+import { getAboutUs, updateAboutUs } from "../bo-functions";
 
 export async function aboutUsRoute(fastify: FastifyInstance) {
     fastify.get("/about-us", async (request, reply) => {
