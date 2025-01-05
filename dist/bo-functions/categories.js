@@ -41,6 +41,7 @@ exports.getAllCategories = getAllCategories;
 *  name: string
 *  description: string
 *  mainCategoryId?: number
+*  mainCategoryName?: string
 *  createdAt: Date
 *  updatedAt: Date
 * }
@@ -49,7 +50,7 @@ const getAllCategoriesNoLevel = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM categories ORDER BY mainCategoryId, id;');
+        const [rows] = await connection.query('SELECT c1.*, c2.name AS mainCategoryName FROM categories c1 LEFT JOIN categories c2 ON c1.mainCategoryId = c2.id ORDER BY c1.mainCategoryId, c1.id;');
         value = rows;
     }
     finally {
@@ -181,7 +182,9 @@ const updateCategory = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [result] = await connection.execute('UPDATE categories SET name=?, description=?, mainCategoryId=? WHERE id=?', [data.name, data.description, data.mainCategoryId || null, data.Id]);
+        let sql = `UPDATE categories SET name='${data.name}', description='${data.description}', mainCategoryId='${data.mainCategoryId || null}' WHERE id=${data.id}`;
+        sql = sql.replaceAll("'null'", "null");
+        const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 204,
             message: `Category updated.`

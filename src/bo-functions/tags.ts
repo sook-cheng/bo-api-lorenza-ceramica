@@ -41,6 +41,7 @@ export const getAllTags = async (fastify: FastifyInstance) => {
 *  name: string
 *  value: string
 *  mainTagId?: number
+*  mainTagName: string
 *  createdAt: Date
 *  updatedAt: Date
 * }
@@ -50,7 +51,7 @@ export const getAllTagsNoLevel = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM tags ORDER BY mainTagId, id;');
+        const [rows] = await connection.query('SELECT t1.*, t2.name AS mainTagName FROM tags t1 LEFT JOIN tags t2 ON t1.mainTagId = t2.id ORDER BY t1.mainTagId, t2.id;');
         value = rows;
     }
     finally {
@@ -194,8 +195,9 @@ export const updateTag = async (fastify: FastifyInstance, data: any) => {
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        const [result] = await connection.execute('UPDATE tags SET name=?, value=?, mainTagId=? WHERE id=?',
-            [data.name, data.value, data.mainTagId || null, data.Id]);
+        let sql = `UPDATE tags SET name='${data.name}', value='${data.description}', mainTagId='${data.mainTagId || null}' WHERE id=${data.id}`;
+        sql = sql.replaceAll("'null'", "null");
+        const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 204,
             message: `Tag updated.`

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteInspirations = exports.deleteInspiration = exports.updateInspiration = exports.createInspiration = exports.getInspirationDetailsById = exports.getAllInspirations = void 0;
+exports.removeThumbnail = exports.uploadThumbnail = exports.deleteInspirations = exports.deleteInspiration = exports.updateInspiration = exports.createInspiration = exports.getInspirationDetailsById = exports.getAllInspirations = void 0;
 const helpers_1 = require("../helpers");
 /**
  *
@@ -60,19 +60,18 @@ exports.getInspirationDetailsById = getInspirationDetailsById;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  title: string
  *  description: string
  *  content: string
  *  path: string
  * }
- * @param thumbnail (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-const createInspiration = async (fastify, data, thumbnail) => {
+const createInspiration = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
@@ -84,8 +83,7 @@ const createInspiration = async (fastify, data, thumbnail) => {
             };
             return;
         }
-        (0, helpers_1.uploadImageFile)('inpsirations', thumbnail);
-        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path,thumbnail) VALUES (?,?,?,?,?)', [data.title, data.description, data.content, data.path, (0, helpers_1.formatImageUrl)('inspirations', thumbnail.filename)]);
+        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path,thumbnail) VALUES (?,?,?,?,?)', [data.title, data.description, data.content, data.path]);
         res = result?.insertId ? {
             code: 201,
             message: `Inspiration created. Created inspiration Id: ${result.insertId}`
@@ -110,20 +108,19 @@ exports.createInspiration = createInspiration;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  id: number
  *  title: string
  *  description: string
  *  content: string
  *  path: string
  * }
- * @param thumbnail (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-const updateInspiration = async (fastify, data, thumbnail) => {
+const updateInspiration = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
@@ -135,10 +132,7 @@ const updateInspiration = async (fastify, data, thumbnail) => {
             };
             return;
         }
-        const oldFile = rows[0].thumbnail.split('/');
-        (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
-        (0, helpers_1.uploadImageFile)('inpsirations', thumbnail);
-        const [result] = await connection.execute('UPDATE inspirations SET title=?, description=?, content=?, path=?, thumbnail=? WHERE id=?', [data.title, data.description, data.content, data.path, (0, helpers_1.formatImageUrl)('inspirations', thumbnail.filename), data.id]);
+        const [result] = await connection.execute('UPDATE inspirations SET title=?, description=?, content=?, path=? WHERE id=?', [data.title, data.description, data.content, data.path, data.id]);
         res = result?.affectedRows ? {
             code: 204,
             message: `Inspiration updated.`
@@ -252,4 +246,94 @@ const deleteInspirations = async (fastify, data) => {
     }
 };
 exports.deleteInspirations = deleteInspirations;
+/**
+ *
+ * @param fastify
+ * @param id
+ * @param image (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ **/
+const uploadThumbnail = async (fastify, id, image) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res = { code: 200, message: "OK." };
+    try {
+        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        if (!rows || rows.length === 0) {
+            res = {
+                code: 400,
+                message: 'Inspiration not found.'
+            };
+            return;
+        }
+        (0, helpers_1.uploadImageFile)('inpsirations', image);
+        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [(0, helpers_1.formatImageUrl)('inspirations', image.filename), id]);
+        res = result?.affectedRows > 0 ? {
+            code: 204,
+            message: `Inspiration thumbnail updated.`
+        } : {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+};
+exports.uploadThumbnail = uploadThumbnail;
+/**
+ *
+ * @param fastify
+ * @param id
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ **/
+const removeThumbnail = async (fastify, id) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res = { code: 200, message: "OK." };
+    try {
+        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        if (!rows || rows.length === 0) {
+            res = {
+                code: 400,
+                message: 'Inspiration not found.'
+            };
+            return;
+        }
+        const oldFile = rows[0].thumbnail.split('/');
+        (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
+        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [null, id]);
+        res = result?.affectedRows > 0 ? {
+            code: 204,
+            message: `Inspiration thumbnail updated.`
+        } : {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+};
+exports.removeThumbnail = removeThumbnail;
 //# sourceMappingURL=inspirations.js.map

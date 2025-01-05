@@ -501,21 +501,29 @@ export const removeProducts = async (fastify: FastifyInstance, data: any) => {
  *  description?: string
  *  variation?: string
  *  color?: string
- *  size?: number (id)
- *  finish?: number (id)
+ *  size?: string
+ *  finish?: string
  *  thickness?: string
  *  images: string[]
  *  mockedImages: string[]
- *  categories: number[] (id)
- *  tags: number[] (id)
+ *  categories: { 
+ *      categoryId: number, 
+ *      productId: number, 
+ *      name: string 
+ *  }[]
+ * tags: { 
+ *      tagId: number, 
+ *      productId: number, 
+ *      name: string 
+ *  }[]
  * }
- */
+*/
 export const getProducts = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any = [];
 
     try {
-        const [rows] = await connection.execute('SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish;');
+        const [rows] = await connection.execute('SELECT DISTINCT * FROM products;');
 
         if (rows.length > 0) {
             const productIds: number[] = rows.map((x: any) => x.id);
@@ -535,9 +543,9 @@ export const getProducts = async (fastify: FastifyInstance) => {
                 const mockedImgs = mockedImages.filter((y: any) => y.productId === x.id);
                 const mockedImgList = mockedImgs.length > 0 ? mockedImgs.map((z: any) => formatImageUrl(z.productName, z.productCode, z.sequence, z.type)) : [];
                 const prdCats = categories.filter((y: any) => y.productId === x.id);
-                const categoryList = prdCats.length > 0 ? prdCats.map((x) => x.categoryId) : [];
+                const categoryList = prdCats.length > 0 ? prdCats : [];
                 const prdTags = tags.filter((y: any) => y.productId === x.id);
-                const tagList = prdTags.length > 0 ? prdTags.map((x) => x.tagId) : [];
+                const tagList = prdTags.length > 0 ? prdTags : [];
 
                 return {
                     id: x.id,
@@ -583,7 +591,7 @@ export const getProducts = async (fastify: FastifyInstance) => {
  *  images: string[]
  *  mockedImages: string[]
  *  categories: number[] (id)
- * tags: number[] (id)
+ *  tags: number[] (id)
  * }
 */
 export const getProductDetailsById = async (fastify: FastifyInstance, id: number) => {

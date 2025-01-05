@@ -191,7 +191,7 @@ export const updateSize = async (fastify: FastifyInstance, data: any) => {
 
     try {
         const [result] = await connection.execute('UPDATE sizes SET name=?, value=? WHERE id=?',
-            [data.name, data.value, data.Id]);
+            [data.name, data.value, data.id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
             message: `Size updated.`

@@ -94,16 +94,16 @@ exports.getSectionDetailsById = getSectionDetailsById;
  * @param fastify
  * @param id
  * @returns {
-*  id: number
-*  question: string
-*  answer: string
-*  sequence: number
-*  sectionId: number
-*  sectionName: string
-*  createdAt: Date
-*  updatedAt: Date
-* }
-*/
+ *  id: number
+ *  question: string
+ *  answer: string
+ *  sequence: number
+ *  sectionId: number
+ *  sectionName: string
+ *  createdAt: Date
+ *  updatedAt: Date
+ * }
+ */
 const getQuestionDetailsById = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
@@ -120,7 +120,7 @@ exports.getQuestionDetailsById = getQuestionDetailsById;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  name: string
  *  sequence: number
  * }
@@ -166,7 +166,7 @@ exports.createSection = createSection;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  question: string
  *  answer: string
  *  sequence: number
@@ -214,7 +214,7 @@ exports.createQuestion = createQuestion;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  id: number
  *  name: string
  *  sequence: number
@@ -253,7 +253,7 @@ exports.updateSection = updateSection;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  id: number
  *  question: string
  *  answer: string
@@ -293,7 +293,7 @@ exports.updateQuestion = updateQuestion;
 /**
  *
  * @param fastify
- * @param iid
+ * @param id
  * @returns {
  *  code: number,
  *  message: string,
@@ -336,7 +336,7 @@ exports.deleteSection = deleteSection;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  questions: number[]
  * }
  * @returns {

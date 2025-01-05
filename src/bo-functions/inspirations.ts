@@ -62,19 +62,18 @@ export const getInspirationDetailsById = async (fastify: FastifyInstance, id: nu
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  title: string
  *  description: string
  *  content: string
  *  path: string
  * }
- * @param thumbnail (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-export const createInspiration = async (fastify: FastifyInstance, data: any, thumbnail: any) => {
+export const createInspiration = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
@@ -89,10 +88,8 @@ export const createInspiration = async (fastify: FastifyInstance, data: any, thu
             return;
         }
 
-        uploadImageFile('inpsirations', thumbnail);
-
         const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path,thumbnail) VALUES (?,?,?,?,?)',
-            [data.title, data.description, data.content, data.path, formatImageUrl('inspirations', thumbnail.filename)]);
+            [data.title, data.description, data.content, data.path]);
 
         res = result?.insertId ? {
             code: 201,
@@ -118,20 +115,19 @@ export const createInspiration = async (fastify: FastifyInstance, data: any, thu
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  id: number
  *  title: string
  *  description: string
  *  content: string
  *  path: string
  * }
- * @param thumbnail (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-export const updateInspiration = async (fastify: FastifyInstance, data: any, thumbnail: any) => {
+export const updateInspiration = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
@@ -146,12 +142,8 @@ export const updateInspiration = async (fastify: FastifyInstance, data: any, thu
             return;
         }
 
-        const oldFile = rows[0].thumbnail.split('/');
-        removeImageFile('inspirations', oldFile[oldFile.length - 1]);
-        uploadImageFile('inpsirations', thumbnail);
-
-        const [result] = await connection.execute('UPDATE inspirations SET title=?, description=?, content=?, path=?, thumbnail=? WHERE id=?',
-            [data.title, data.description, data.content, data.path, formatImageUrl('inspirations', thumbnail.filename), data.id]);
+        const [result] = await connection.execute('UPDATE inspirations SET title=?, description=?, content=?, path=? WHERE id=?',
+            [data.title, data.description, data.content, data.path, data.id]);
 
         res = result?.affectedRows ? {
             code: 204,
@@ -256,6 +248,106 @@ export const deleteInspirations = async (fastify: FastifyInstance, data: any) =>
         res = result?.affectedRows > 0 ? {
             code: 204,
             message: "All inspirations removed."
+        } : {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param id
+ * @param image (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ **/
+export const uploadThumbnail = async (fastify: FastifyInstance, id: number, image: any) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+
+        if (!rows || rows.length === 0) {
+            res = {
+                code: 400,
+                message: 'Inspiration not found.'
+            }
+            return;
+        }
+
+        uploadImageFile('inpsirations', image);
+
+        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?',
+            [formatImageUrl('inspirations', image.filename), id]);
+        res = result?.affectedRows > 0 ? {
+            code: 204,
+            message: `Inspiration thumbnail updated.`
+        } : {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param id
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ **/
+export const removeThumbnail = async (fastify: FastifyInstance, id: number) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+
+        if (!rows || rows.length === 0) {
+            res = {
+                code: 400,
+                message: 'Inspiration not found.'
+            }
+            return;
+        }
+
+        const oldFile = rows[0].thumbnail.split('/');
+        removeImageFile('inspirations', oldFile[oldFile.length - 1]);
+
+        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?',
+            [null, id]);
+        res = result?.affectedRows > 0 ? {
+            code: 204,
+            message: `Inspiration thumbnail updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
