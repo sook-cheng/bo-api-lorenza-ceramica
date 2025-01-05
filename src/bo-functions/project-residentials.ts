@@ -1,7 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInspirationsImagesById = exports.uploadInspirationsImages = exports.removeInspirationThumbnail = exports.uploadInspirationThumbnail = exports.deleteInspirations = exports.deleteInspiration = exports.updateInspiration = exports.createInspiration = exports.getInspirationDetailsById = exports.getAllInspirations = void 0;
-const helpers_1 = require("../helpers");
+import { FastifyInstance } from "fastify";
+import { formatImageUrl, removeImageFile, uploadImageFile } from "../helpers";
+
 /**
  *
  * @param fastify
@@ -16,23 +15,24 @@ const helpers_1 = require("../helpers");
  *  updatedAt: Date
  * }
  */
-const getAllInspirations = async (fastify) => {
+export const getAllProjectResidentials = async (fastify: FastifyInstance) => {
     const connection = await fastify["mysql"].getConnection();
-    let value;
+    let value: any;
+
     try {
-        const [rows] = await connection.query("SELECT * FROM inspirations ORDER BY id");
+        const [rows] = await connection.query("SELECT * FROM projectResidentials ORDER BY id");
+
         value = rows;
-    }
-    finally {
+    } finally {
         connection.release();
         return value;
     }
 };
-exports.getAllInspirations = getAllInspirations;
+
 /**
- *
- * @param fastify
- * @param id
+ * 
+ * @param fastify 
+ * @param id 
  * @returns {
  *  id: number
  *  title: string
@@ -44,23 +44,25 @@ exports.getAllInspirations = getAllInspirations;
  *  updatedAt: Date
  * }
  */
-const getInspirationDetailsById = async (fastify, id) => {
+export const getProjectResidentialDetailsById = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
-    let value;
+    let value: any;
+
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectResidentials WHERE id=?', [id]);
+
         value = rows[0];
     }
     finally {
         connection.release();
         return value;
     }
-};
-exports.getInspirationDetailsById = getInspirationDetailsById;
+}
+
 /**
- *
- * @param fastify
- * @param data {
+ * 
+ * @param fastify 
+ * @param data { 
  *  title: string
  *  description: string
  *  content: string
@@ -71,22 +73,27 @@ exports.getInspirationDetailsById = getInspirationDetailsById;
  *  message: string,
  * }
  */
-const createInspiration = async (fastify, data) => {
+export const createProjectResidential = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res = { code: 200, message: "OK." };
+    let res: { code: number, message: string, id?: number } = { code: 200, message: "OK." };
+
     try {
-        const [rows] = await connection.query('SELECT id FROM inspirations WHERE title=?', [data.title]);
+        const [rows] = await connection.query('SELECT id FROM projectResidentials WHERE title=?', [data.title]);
+
         if (rows && rows.length > 0) {
             res = {
                 code: 409,
-                message: 'Inspiration existed.'
-            };
+                message: 'Project Residential existed.'
+            }
             return;
         }
-        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path) VALUES (?,?,?,?)', [data.title, data.description, data.content, data.path]);
+
+        const [result] = await connection.execute('INSERT INTO projectResidentials (title,description,content,path) VALUES (?,?,?,?)',
+            [data.title, data.description, data.content, data.path]);
+
         res = result?.insertId ? {
             code: 201,
-            message: `Inspiration created. Created inspiration Id: ${result.insertId}`,
+            message: `Project Residential created. Created project Residential Id: ${result.insertId}`,
             id: result.insertId,
         } : {
             code: 500,
@@ -104,12 +111,12 @@ const createInspiration = async (fastify, data) => {
         connection.release();
         return res;
     }
-};
-exports.createInspiration = createInspiration;
+}
+
 /**
- *
- * @param fastify
- * @param data {
+ * 
+ * @param fastify 
+ * @param data { 
  *  id: number
  *  title: string
  *  description: string
@@ -121,22 +128,27 @@ exports.createInspiration = createInspiration;
  *  message: string,
  * }
  */
-const updateInspiration = async (fastify, data) => {
+export const updateProjectResidential = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res = { code: 200, message: "OK." };
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [data.id]);
+        const [rows] = await connection.query('SELECT * FROM projectResidentials WHERE id=?', [data.id]);
+
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
-            };
+                message: 'Project Residential not found.'
+            }
             return;
         }
-        const [result] = await connection.execute('UPDATE inspirations SET title=?, description=?, content=?, path=? WHERE id=?', [data.title, data.description, data.content, data.path, data.id]);
+
+        const [result] = await connection.execute('UPDATE projectResidentials SET title=?, description=?, content=?, path=? WHERE id=?',
+            [data.title, data.description, data.content, data.path, data.id]);
+
         res = result?.affectedRows ? {
             code: 204,
-            message: `Inspiration updated.`
+            message: `Project Residential updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -153,37 +165,41 @@ const updateInspiration = async (fastify, data) => {
         connection.release();
         return res;
     }
-};
-exports.updateInspiration = updateInspiration;
+}
+
 /**
- *
- * @param fastify
+ * 
+ * @param fastify 
  * @param id
  *  @returns {
  *  code: number,
  *  message: string,
  * }
  */
-const deleteInspiration = async (fastify, id) => {
+export const deleteProjectResidential = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
-    let res = { code: 200, message: "OK." };
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectResidentials WHERE id=?', [id]);
+
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
-            };
+                message: 'Project Residential not found.'
+            }
             return;
         }
+
         if (rows[0].thumbnail) {
             const oldFile = rows[0].thumbnail.split('/');
-            (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
+            removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
         }
-        const [result] = await connection.execute('DELETE FROM inspirations WHERE id=?', [id]);
+
+        const [result] = await connection.execute('DELETE FROM projectResidentials WHERE id=?', [id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: "Inspiration removed."
+            message: "Project Residential removed."
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -200,37 +216,41 @@ const deleteInspiration = async (fastify, id) => {
         connection.release();
         return res;
     }
-};
-exports.deleteInspiration = deleteInspiration;
+}
+
 /**
- *
- * @param fastify
+ * 
+ * @param fastify 
  * @param data {
- *  inspirations: number[]
+ *  projectResidentials: number[]
  * }
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-const deleteInspirations = async (fastify, data) => {
+export const deleteProjectResidentials = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res = { code: 200, message: "OK." };
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
     try {
         let args = '';
-        for (const id of data.inspirations) {
+        for (const id of data.projectResidentials) {
             args = args.concat(`${id},`);
         }
+
         args = args.substring(0, args.length - 1);
-        const [rows] = await connection.query(`SELECT * FROM inspirations WHERE id IN (${args})`);
+        const [rows] = await connection.query(`SELECT * FROM projectResidentials WHERE id IN (${args})`);
+
         for (const r of rows) {
             const oldFile = r.thumbnail.split('/');
-            (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
+            removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
         }
-        const [result] = await connection.execute(`DELETE FROM inspirations WHERE id IN (${args})`);
+
+        const [result] = await connection.execute(`DELETE FROM projectResidentials WHERE id IN (${args})`);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: "All inspirations removed."
+            message: "All projects residentials removed."
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -247,11 +267,11 @@ const deleteInspirations = async (fastify, data) => {
         connection.release();
         return res;
     }
-};
-exports.deleteInspirations = deleteInspirations;
+}
+
 /**
- *
- * @param fastify
+ * 
+ * @param fastify 
  * @param id
  * @param image (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
@@ -259,23 +279,28 @@ exports.deleteInspirations = deleteInspirations;
  *  message: string,
  * }
  **/
-const uploadInspirationThumbnail = async (fastify, id, image) => {
+export const uploadResidentialThumbnail = async (fastify: FastifyInstance, id: number, image: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res = { code: 200, message: "OK." };
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectResidentials WHERE id=?', [id]);
+
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
-            };
+                message: 'Project Residential not found.'
+            }
             return;
         }
-        (0, helpers_1.uploadImageFile)('inspirations', image);
-        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [(0, helpers_1.formatImageUrl)('inspirations', image.filename), id]);
+
+        uploadImageFile('projects/residentials', image);
+
+        const [result] = await connection.execute('UPDATE projectResidentials SET thumbnail=? WHERE id=?',
+            [formatImageUrl('projects/residentials', image.filename), id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: `Inspiration thumbnail updated.`
+            message: `Project Residential thumbnail updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -292,35 +317,40 @@ const uploadInspirationThumbnail = async (fastify, id, image) => {
         connection.release();
         return res;
     }
-};
-exports.uploadInspirationThumbnail = uploadInspirationThumbnail;
+}
+
 /**
- *
- * @param fastify
+ * 
+ * @param fastify 
  * @param id
  * @returns {
  *  code: number,
  *  message: string,
  * }
  **/
-const removeInspirationThumbnail = async (fastify, id) => {
+export const removeResidentialThumbnail = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
-    let res = { code: 200, message: "OK." };
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectResidentials WHERE id=?', [id]);
+
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
-            };
+                message: 'Project Residential not found.'
+            }
             return;
         }
+
         const oldFile = rows[0].thumbnail.split('/');
-        (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
-        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [null, id]);
+        removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
+
+        const [result] = await connection.execute('UPDATE projectResidentials SET thumbnail=? WHERE id=?',
+            [null, id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: `Inspiration thumbnail updated.`
+            message: `Project Residential thumbnail updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -337,11 +367,11 @@ const removeInspirationThumbnail = async (fastify, id) => {
         connection.release();
         return res;
     }
-};
-exports.removeInspirationThumbnail = removeInspirationThumbnail;
+}
+
 /**
- *
- * @param fastify
+ * 
+ * @param fastify 
  * @param id
  * @param images (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
@@ -349,26 +379,30 @@ exports.removeInspirationThumbnail = removeInspirationThumbnail;
  *  message: string,
  * }
  **/
-const uploadInspirationsImages = async (fastify, id, images) => {
+export const uploadProjectResidentialsImages = async (fastify: FastifyInstance, id: number, images: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res = { code: 200, message: "OK." };
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
     try {
-        const imgs = [];
-        const [rows] = await connection.query('SELECT id FROM inspirations WHERE id=?', [id]);
+        const imgs: any[] = [];
+        const [rows] = await connection.query('SELECT id FROM projectResidentials WHERE id=?', [id]);
+
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: "Inspiration not found."
+                message: "Project Residential not found."
             };
             return;
         }
+
         for await (const i of images) {
             if (i.type === 'file') {
-                (0, helpers_1.uploadImageFile)('inspirations', i);
-                imgs.push((0, helpers_1.formatImageUrl)('inspirations', i.filename));
+                uploadImageFile('projects/residentials', i);
+                imgs.push(formatImageUrl('projects/residentials', i.filename));
             }
         }
-        let sql = "INSERT INTO inspirationsImages (inspirationId, imageUrl) VALUES ";
+
+        let sql = "INSERT INTO projectResidentialsImages (projectResidentialId, imageUrl) VALUES ";
         for (const i of imgs) {
             sql += `(${id},'${i}'),`;
         }
@@ -377,7 +411,7 @@ const uploadInspirationsImages = async (fastify, id, images) => {
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 201,
-            message: `Inspirations images uploaded.`
+            message: `Project Residentials images uploaded.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -394,31 +428,30 @@ const uploadInspirationsImages = async (fastify, id, images) => {
         connection.release();
         return res;
     }
-};
-exports.uploadInspirationsImages = uploadInspirationsImages;
+}
+
 /**
- *
- * @param fastify
- * @param id
+ * 
+ * @param fastify 
+ * @param id 
  * @returns {
 *  id: number
-*  inspirationId: number
+*  projectResidentialId: number
 *  imageUrl: string
 *  createdAt: Date
 *  updatedAt: Date
 * }
 */
-const getInspirationsImagesById = async (fastify, id) => {
+export const getProjectResidentialsImagesById = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
-    let value;
+    let value: any;
+
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirationsImages WHERE inspirationId=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectResidentialsImages WHERE projectResidentialId=?', [id]);
         value = rows;
     }
     finally {
         connection.release();
         return value;
     }
-};
-exports.getInspirationsImagesById = getInspirationsImagesById;
-//# sourceMappingURL=inspirations.js.map
+}

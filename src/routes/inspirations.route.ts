@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createInspiration, deleteInspiration, deleteInspirations, getAllInspirations, getInspirationDetailsById, getInspirationsImagesById, removeThumbnail, updateInspiration, uploadInspirationsImages, uploadThumbnail } from "../bo-functions";
+import { createInspiration, deleteInspiration, deleteInspirations, getAllInspirations, getInspirationDetailsById, getInspirationsImagesById, removeInspirationThumbnail, updateInspiration, uploadInspirationsImages, uploadInspirationThumbnail } from "../bo-functions";
 
 export async function inspirationsRoute(fastify: FastifyInstance) {
     fastify.get("/all-inspirations", async (request, reply) => {
@@ -35,13 +35,13 @@ export async function inspirationsRoute(fastify: FastifyInstance) {
     fastify.post("/upload-inspiration-thumbnail/:id", async (request, reply) => {
         const { id }: any = request.params;
         const image = await request.file({ limits: { fileSize: 100000 } });
-        const result = await uploadThumbnail(fastify, id, image);
+        const result = await uploadInspirationThumbnail(fastify, id, image);
         reply.code(result?.code!).send({ message: result?.message });
     });
 
     fastify.post("/remove-inspiration-thumbnail/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const result = await removeThumbnail(fastify, id);
+        const result = await removeInspirationThumbnail(fastify, id);
         reply.code(result?.code!).send({ message: result?.message });
     });
 

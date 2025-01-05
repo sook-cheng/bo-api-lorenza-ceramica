@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInspirationsImagesById = exports.uploadInspirationsImages = exports.removeInspirationThumbnail = exports.uploadInspirationThumbnail = exports.deleteInspirations = exports.deleteInspiration = exports.updateInspiration = exports.createInspiration = exports.getInspirationDetailsById = exports.getAllInspirations = void 0;
+exports.getProjectCommercialsImagesById = exports.uploadProjectCommercialsImages = exports.removeCommercialThumbnail = exports.uploadCommercialThumbnail = exports.deleteProjectCommercials = exports.deleteProjectCommercial = exports.updateProjectCommercial = exports.createProjectCommercial = exports.getProjectCommercialDetailsById = exports.getAllProjectCommercials = void 0;
 const helpers_1 = require("../helpers");
 /**
  *
@@ -16,11 +16,11 @@ const helpers_1 = require("../helpers");
  *  updatedAt: Date
  * }
  */
-const getAllInspirations = async (fastify) => {
+const getAllProjectCommercials = async (fastify) => {
     const connection = await fastify["mysql"].getConnection();
     let value;
     try {
-        const [rows] = await connection.query("SELECT * FROM inspirations ORDER BY id");
+        const [rows] = await connection.query("SELECT * FROM projectCommercials ORDER BY id");
         value = rows;
     }
     finally {
@@ -28,7 +28,7 @@ const getAllInspirations = async (fastify) => {
         return value;
     }
 };
-exports.getAllInspirations = getAllInspirations;
+exports.getAllProjectCommercials = getAllProjectCommercials;
 /**
  *
  * @param fastify
@@ -44,11 +44,11 @@ exports.getAllInspirations = getAllInspirations;
  *  updatedAt: Date
  * }
  */
-const getInspirationDetailsById = async (fastify, id) => {
+const getProjectCommercialDetailsById = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectCommercials WHERE id=?', [id]);
         value = rows[0];
     }
     finally {
@@ -56,7 +56,7 @@ const getInspirationDetailsById = async (fastify, id) => {
         return value;
     }
 };
-exports.getInspirationDetailsById = getInspirationDetailsById;
+exports.getProjectCommercialDetailsById = getProjectCommercialDetailsById;
 /**
  *
  * @param fastify
@@ -71,22 +71,22 @@ exports.getInspirationDetailsById = getInspirationDetailsById;
  *  message: string,
  * }
  */
-const createInspiration = async (fastify, data) => {
+const createProjectCommercial = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [rows] = await connection.query('SELECT id FROM inspirations WHERE title=?', [data.title]);
+        const [rows] = await connection.query('SELECT id FROM projectCommercials WHERE title=?', [data.title]);
         if (rows && rows.length > 0) {
             res = {
                 code: 409,
-                message: 'Inspiration existed.'
+                message: 'Project Commercial existed.'
             };
             return;
         }
-        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path) VALUES (?,?,?,?)', [data.title, data.description, data.content, data.path]);
+        const [result] = await connection.execute('INSERT INTO projectCommercials (title,description,content,path) VALUES (?,?,?,?)', [data.title, data.description, data.content, data.path]);
         res = result?.insertId ? {
             code: 201,
-            message: `Inspiration created. Created inspiration Id: ${result.insertId}`,
+            message: `Project Commercial created. Created project Commercial Id: ${result.insertId}`,
             id: result.insertId,
         } : {
             code: 500,
@@ -105,7 +105,7 @@ const createInspiration = async (fastify, data) => {
         return res;
     }
 };
-exports.createInspiration = createInspiration;
+exports.createProjectCommercial = createProjectCommercial;
 /**
  *
  * @param fastify
@@ -121,22 +121,22 @@ exports.createInspiration = createInspiration;
  *  message: string,
  * }
  */
-const updateInspiration = async (fastify, data) => {
+const updateProjectCommercial = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [data.id]);
+        const [rows] = await connection.query('SELECT * FROM projectCommercials WHERE id=?', [data.id]);
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
+                message: 'Project Commercial not found.'
             };
             return;
         }
-        const [result] = await connection.execute('UPDATE inspirations SET title=?, description=?, content=?, path=? WHERE id=?', [data.title, data.description, data.content, data.path, data.id]);
+        const [result] = await connection.execute('UPDATE projectCommercials SET title=?, description=?, content=?, path=? WHERE id=?', [data.title, data.description, data.content, data.path, data.id]);
         res = result?.affectedRows ? {
             code: 204,
-            message: `Inspiration updated.`
+            message: `Project Commercial updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -154,7 +154,7 @@ const updateInspiration = async (fastify, data) => {
         return res;
     }
 };
-exports.updateInspiration = updateInspiration;
+exports.updateProjectCommercial = updateProjectCommercial;
 /**
  *
  * @param fastify
@@ -164,26 +164,26 @@ exports.updateInspiration = updateInspiration;
  *  message: string,
  * }
  */
-const deleteInspiration = async (fastify, id) => {
+const deleteProjectCommercial = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectCommercials WHERE id=?', [id]);
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
+                message: 'Project Commercial not found.'
             };
             return;
         }
         if (rows[0].thumbnail) {
             const oldFile = rows[0].thumbnail.split('/');
-            (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
+            (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
         }
-        const [result] = await connection.execute('DELETE FROM inspirations WHERE id=?', [id]);
+        const [result] = await connection.execute('DELETE FROM projectCommercials WHERE id=?', [id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: "Inspiration removed."
+            message: "Project Commercial removed."
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -201,36 +201,36 @@ const deleteInspiration = async (fastify, id) => {
         return res;
     }
 };
-exports.deleteInspiration = deleteInspiration;
+exports.deleteProjectCommercial = deleteProjectCommercial;
 /**
  *
  * @param fastify
  * @param data {
- *  inspirations: number[]
+ *  projectCommercials: number[]
  * }
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-const deleteInspirations = async (fastify, data) => {
+const deleteProjectCommercials = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
         let args = '';
-        for (const id of data.inspirations) {
+        for (const id of data.projectCommercials) {
             args = args.concat(`${id},`);
         }
         args = args.substring(0, args.length - 1);
-        const [rows] = await connection.query(`SELECT * FROM inspirations WHERE id IN (${args})`);
+        const [rows] = await connection.query(`SELECT * FROM projectCommercials WHERE id IN (${args})`);
         for (const r of rows) {
             const oldFile = r.thumbnail.split('/');
-            (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
+            (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
         }
-        const [result] = await connection.execute(`DELETE FROM inspirations WHERE id IN (${args})`);
+        const [result] = await connection.execute(`DELETE FROM projectCommercials WHERE id IN (${args})`);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: "All inspirations removed."
+            message: "All projects commercials removed."
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -248,7 +248,7 @@ const deleteInspirations = async (fastify, data) => {
         return res;
     }
 };
-exports.deleteInspirations = deleteInspirations;
+exports.deleteProjectCommercials = deleteProjectCommercials;
 /**
  *
  * @param fastify
@@ -259,23 +259,23 @@ exports.deleteInspirations = deleteInspirations;
  *  message: string,
  * }
  **/
-const uploadInspirationThumbnail = async (fastify, id, image) => {
+const uploadCommercialThumbnail = async (fastify, id, image) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectCommercials WHERE id=?', [id]);
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
+                message: 'Project Commercial not found.'
             };
             return;
         }
-        (0, helpers_1.uploadImageFile)('inspirations', image);
-        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [(0, helpers_1.formatImageUrl)('inspirations', image.filename), id]);
+        (0, helpers_1.uploadImageFile)('projects/commercials', image);
+        const [result] = await connection.execute('UPDATE projectCommercials SET thumbnail=? WHERE id=?', [(0, helpers_1.formatImageUrl)('projects/commercials', image.filename), id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: `Inspiration thumbnail updated.`
+            message: `Project Commercial thumbnail updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -293,7 +293,7 @@ const uploadInspirationThumbnail = async (fastify, id, image) => {
         return res;
     }
 };
-exports.uploadInspirationThumbnail = uploadInspirationThumbnail;
+exports.uploadCommercialThumbnail = uploadCommercialThumbnail;
 /**
  *
  * @param fastify
@@ -303,24 +303,24 @@ exports.uploadInspirationThumbnail = uploadInspirationThumbnail;
  *  message: string,
  * }
  **/
-const removeInspirationThumbnail = async (fastify, id) => {
+const removeCommercialThumbnail = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectCommercials WHERE id=?', [id]);
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: 'Inspiration not found.'
+                message: 'Project Commercial not found.'
             };
             return;
         }
         const oldFile = rows[0].thumbnail.split('/');
-        (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
-        const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [null, id]);
+        (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
+        const [result] = await connection.execute('UPDATE projectCommercials SET thumbnail=? WHERE id=?', [null, id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: `Inspiration thumbnail updated.`
+            message: `Project Commercial thumbnail updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -338,7 +338,7 @@ const removeInspirationThumbnail = async (fastify, id) => {
         return res;
     }
 };
-exports.removeInspirationThumbnail = removeInspirationThumbnail;
+exports.removeCommercialThumbnail = removeCommercialThumbnail;
 /**
  *
  * @param fastify
@@ -349,26 +349,26 @@ exports.removeInspirationThumbnail = removeInspirationThumbnail;
  *  message: string,
  * }
  **/
-const uploadInspirationsImages = async (fastify, id, images) => {
+const uploadProjectCommercialsImages = async (fastify, id, images) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
         const imgs = [];
-        const [rows] = await connection.query('SELECT id FROM inspirations WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT id FROM projectCommercials WHERE id=?', [id]);
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
-                message: "Inspiration not found."
+                message: "Project Commercial not found."
             };
             return;
         }
         for await (const i of images) {
             if (i.type === 'file') {
-                (0, helpers_1.uploadImageFile)('inspirations', i);
-                imgs.push((0, helpers_1.formatImageUrl)('inspirations', i.filename));
+                (0, helpers_1.uploadImageFile)('projects/commercials', i);
+                imgs.push((0, helpers_1.formatImageUrl)('projects/commercials', i.filename));
             }
         }
-        let sql = "INSERT INTO inspirationsImages (inspirationId, imageUrl) VALUES ";
+        let sql = "INSERT INTO projectCommercialsImages (projectCommercialId, imageUrl) VALUES ";
         for (const i of imgs) {
             sql += `(${id},'${i}'),`;
         }
@@ -377,7 +377,7 @@ const uploadInspirationsImages = async (fastify, id, images) => {
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 201,
-            message: `Inspirations images uploaded.`
+            message: `Project Commercials images uploaded.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -395,24 +395,24 @@ const uploadInspirationsImages = async (fastify, id, images) => {
         return res;
     }
 };
-exports.uploadInspirationsImages = uploadInspirationsImages;
+exports.uploadProjectCommercialsImages = uploadProjectCommercialsImages;
 /**
  *
  * @param fastify
  * @param id
  * @returns {
 *  id: number
-*  inspirationId: number
+*  projectCommercialId: number
 *  imageUrl: string
 *  createdAt: Date
 *  updatedAt: Date
 * }
 */
-const getInspirationsImagesById = async (fastify, id) => {
+const getProjectCommercialsImagesById = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM inspirationsImages WHERE inspirationId=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM projectCommercialsImages WHERE projectCommercialId=?', [id]);
         value = rows;
     }
     finally {
@@ -420,5 +420,5 @@ const getInspirationsImagesById = async (fastify, id) => {
         return value;
     }
 };
-exports.getInspirationsImagesById = getInspirationsImagesById;
-//# sourceMappingURL=inspirations.js.map
+exports.getProjectCommercialsImagesById = getProjectCommercialsImagesById;
+//# sourceMappingURL=project-commercials.js.map

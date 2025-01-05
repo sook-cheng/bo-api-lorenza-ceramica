@@ -30,12 +30,12 @@ async function inspirationsRoute(fastify) {
     fastify.post("/upload-inspiration-thumbnail/:id", async (request, reply) => {
         const { id } = request.params;
         const image = await request.file({ limits: { fileSize: 100000 } });
-        const result = await (0, bo_functions_1.uploadThumbnail)(fastify, id, image);
+        const result = await (0, bo_functions_1.uploadInspirationThumbnail)(fastify, id, image);
         reply.code(result?.code).send({ message: result?.message });
     });
     fastify.post("/remove-inspiration-thumbnail/:id", async (request, reply) => {
         const { id } = request.params;
-        const result = await (0, bo_functions_1.removeThumbnail)(fastify, id);
+        const result = await (0, bo_functions_1.removeInspirationThumbnail)(fastify, id);
         reply.code(result?.code).send({ message: result?.message });
     });
     fastify.post("/upload-inspirations-images/:id", async (request, reply) => {

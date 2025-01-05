@@ -22,6 +22,8 @@ __exportStar(require("./inspirations"), exports);
 __exportStar(require("./products"), exports);
 __exportStar(require("./products-images"), exports);
 __exportStar(require("./products-side-navs"), exports);
+__exportStar(require("./project-commercials"), exports);
+__exportStar(require("./project-residentials"), exports);
 __exportStar(require("./categories"), exports);
 __exportStar(require("./colors"), exports);
 __exportStar(require("./finishes"), exports);

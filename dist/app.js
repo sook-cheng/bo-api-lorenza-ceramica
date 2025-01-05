@@ -36,6 +36,8 @@ server.register(routes_1.inspirationsRoute);
 server.register(routes_1.productsRoute);
 server.register(routes_1.productsImagesRoute);
 server.register(routes_1.productsSideNavsRoute);
+server.register(routes_1.projectCommercialsRoute);
+server.register(routes_1.projectResidentialsRoute);
 server.register(routes_1.sizesRoute);
 server.register(routes_1.tagsRoute);
 server.listen({ host: '127.0.0.1', port: 8080 }, (err, address) => {

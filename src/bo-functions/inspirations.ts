@@ -191,8 +191,10 @@ export const deleteInspiration = async (fastify: FastifyInstance, id: number) =>
             return;
         }
 
-        const oldFile = rows[0].thumbnail.split('/');
-        removeImageFile('inspirations', oldFile[oldFile.length - 1]);
+        if (rows[0].thumbnail) {
+            const oldFile = rows[0].thumbnail.split('/');
+            removeImageFile('inspirations', oldFile[oldFile.length - 1]);
+        }
 
         const [result] = await connection.execute('DELETE FROM inspirations WHERE id=?', [id]);
         res = result?.affectedRows > 0 ? {
@@ -277,7 +279,7 @@ export const deleteInspirations = async (fastify: FastifyInstance, data: any) =>
  *  message: string,
  * }
  **/
-export const uploadThumbnail = async (fastify: FastifyInstance, id: number, image: any) => {
+export const uploadInspirationThumbnail = async (fastify: FastifyInstance, id: number, image: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
@@ -326,7 +328,7 @@ export const uploadThumbnail = async (fastify: FastifyInstance, id: number, imag
  *  message: string,
  * }
  **/
-export const removeThumbnail = async (fastify: FastifyInstance, id: number) => {
+export const removeInspirationThumbnail = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 

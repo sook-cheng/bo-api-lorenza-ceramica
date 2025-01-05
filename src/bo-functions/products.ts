@@ -307,6 +307,8 @@ export const removeTagsForProduct = async (fastify: FastifyInstance, data: any) 
  *  size?: number
  *  finish?: number
  *  thickness?: string
+ *  tags: number[]
+ *  categories: number[]
  * }
  * @returns {
  *  code: number,
@@ -358,6 +360,55 @@ export const updateProduct = async (fastify: FastifyInstance, data: any) => {
                     // Insert new finish
                     await connection.execute('INSERT INTO productsFinishes (productId,finishId) VALUES (?,?)', [data.id, data.finish]);
                 }
+
+                // Remove and assign categories
+                const [categories] = await connection.query('SELECT categoryId FROM productsCategories WHERE productId=?', [rows[0].id]);
+                let addCategories = [];
+                let deleteCategories = [];
+
+                if (data.categories && data.categories.length > 0) {
+                    if (categories && categories.length > 0) {
+                        addCategories = data.categories.filter((x: number) => !categories.find((y: any) => y.categoryId === x));
+                        const deletedAry = categories.filter((x: any) => !data.categories.find((y: number) => x.categoryId === y));
+                        deleteCategories = deletedAry.length > 0 ? deletedAry.map((x: any) => x.categoryId) : [];
+                    }
+                    else {
+                        addCategories = data.categories;
+                    }
+                }
+                else {
+                    if (categories && categories.length > 0) {
+                        deleteCategories = categories.map((x: any) => x.categoryId);
+                    }
+                }
+
+                if (addCategories.length > 0) await assignProductToCategories(fastify, { productId: rows[0].id, categories: addCategories });
+                if (deleteCategories.length > 0) await removeCategoriesForProduct(fastify, { productId: rows[0].id, categories: deleteCategories });
+
+                // Remove and assign tags
+                const [tags] = await connection.query('SELECT tagId FROM productsTags WHERE productId=?', [rows[0].id]);
+                let addTags = [];
+                let deleteTags = [];
+
+                if (data.tags && data.tags.length > 0) {
+                    if (tags && tags.length > 0) {
+                        addTags = data.tags.filter((x: number) => !tags.find((y: any) => y.tagId === x));
+                        const deletedAry = tags.filter((x: any) => !data.tags.find((y: number) => x.tagId === y));
+                        deleteTags = deletedAry.length > 0 ? deletedAry.map((x: any) => x.tagId) : [];
+                    }
+                    else {
+                        addTags = data.tags;
+                    }
+                }
+                else {
+                    if (tags && tags.length > 0) {
+                        deleteTags = tags.map((x: any) => x.tagId);
+                    }
+                }
+
+                if (addTags.length > 0) await assignProductToTags(fastify, { productId: rows[0].id, tags: addTags });
+                if (deleteTags.length > 0) await removeTagsForProduct(fastify, { productId: rows[0].id, tags: deleteTags });
+
             }
         }
 

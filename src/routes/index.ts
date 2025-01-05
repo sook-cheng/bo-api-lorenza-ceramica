@@ -6,6 +6,8 @@ export * from './inspirations.route';
 export * from './products.route';
 export * from './products-images.route';
 export * from './products-side-navs.route';
+export * from './project-commercials.route';
+export * from './project-residentials.route';
 export * from './categories.route';
 export * from './colors.route';
 export * from './finishes.route';

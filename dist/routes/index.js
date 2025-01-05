@@ -22,6 +22,8 @@ __exportStar(require("./inspirations.route"), exports);
 __exportStar(require("./products.route"), exports);
 __exportStar(require("./products-images.route"), exports);
 __exportStar(require("./products-side-navs.route"), exports);
+__exportStar(require("./project-commercials.route"), exports);
+__exportStar(require("./project-residentials.route"), exports);
 __exportStar(require("./categories.route"), exports);
 __exportStar(require("./colors.route"), exports);
 __exportStar(require("./finishes.route"), exports);
