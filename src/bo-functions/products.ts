@@ -501,29 +501,21 @@ export const removeProducts = async (fastify: FastifyInstance, data: any) => {
  *  description?: string
  *  variation?: string
  *  color?: string
- *  size?: string
- *  finish?: string
+ *  size?: number (id)
+ *  finish?: number (id)
  *  thickness?: string
  *  images: string[]
  *  mockedImages: string[]
- *  categories: { 
- *      categoryId: number, 
- *      productId: number, 
- *      name: string 
- *  }[]
- * tags: { 
- *      tagId: number, 
- *      productId: number, 
- *      name: string 
- *  }[]
+ *  categories: number[] (id)
+ *  tags: number[] (id)
  * }
-*/
+ */
 export const getProducts = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any = [];
 
     try {
-        const [rows] = await connection.execute('SELECT DISTINCT * FROM products;');
+        const [rows] = await connection.execute('SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish;');
 
         if (rows.length > 0) {
             const productIds: number[] = rows.map((x: any) => x.id);
@@ -543,9 +535,9 @@ export const getProducts = async (fastify: FastifyInstance) => {
                 const mockedImgs = mockedImages.filter((y: any) => y.productId === x.id);
                 const mockedImgList = mockedImgs.length > 0 ? mockedImgs.map((z: any) => formatImageUrl(z.productName, z.productCode, z.sequence, z.type)) : [];
                 const prdCats = categories.filter((y: any) => y.productId === x.id);
-                const categoryList = prdCats.length > 0 ? prdCats : [];
+                const categoryList = prdCats.length > 0 ? prdCats.map((x) => x.categoryId) : [];
                 const prdTags = tags.filter((y: any) => y.productId === x.id);
-                const tagList = prdTags.length > 0 ? prdTags : [];
+                const tagList = prdTags.length > 0 ? prdTags.map((x) => x.tagId) : [];
 
                 return {
                     id: x.id,
@@ -585,21 +577,13 @@ export const getProducts = async (fastify: FastifyInstance) => {
  *  description?: string
  *  variation?: string
  *  color?: string
- *  size?: string
- *  finish?: string
+ *  size?: number
+ *  finish?: number
  *  thickness?: string
  *  images: string[]
  *  mockedImages: string[]
- *  categories: { 
- *      categoryId: number, 
- *      productId: number, 
- *      name: string 
- *  }[]
- * tags: { 
- *      tagId: number, 
- *      productId: number, 
- *      name: string 
- *  }[]
+ *  categories: number[] (id)
+ * tags: number[] (id)
  * }
 */
 export const getProductDetailsById = async (fastify: FastifyInstance, id: number) => {
@@ -607,7 +591,7 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
     let value: any;
 
     try {
-        const [rows] = await connection.query(`SELECT DISTINCT * FROM products WHERE Id =?;`, [id]);
+        const [rows] = await connection.query(`SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish WHERE p.id =?;`, [id]);
 
         const [images] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 0;`, [id]);
         const [mockedImages] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 1;`, [id]);
@@ -616,8 +600,8 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
 
         const imgList = images.length > 0 ? images.map((z: any) => formatImageUrl(z.productName, z.productCode, z.sequence, z.type)) : [];
         const mockedImgList = mockedImages.length > 0 ? mockedImages.map((z: any) => formatImageUrl(z.productName, z.productCode, z.sequence, z.type)) : [];
-        const categoryList = categories.length > 0 ? categories : [];
-        const tagList = tags.length > 0 ? tags : [];
+        const categoryList = categories.length > 0 ? categories.map((x) => x.categoryId) : [];
+        const tagList = tags.length > 0 ? tags.map((x) => x.tagId) : [];
 
         value = {
             id: rows[0].id,

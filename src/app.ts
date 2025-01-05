@@ -22,7 +22,7 @@ server.register(cors, {
     }
 });
 
-server.register(fastifyMultipart);
+server.register(fastifyMultipart, { throwFileSizeLimit: false });
 
 // routes
 server.register(aboutUsRoute);

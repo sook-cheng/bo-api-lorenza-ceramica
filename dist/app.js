@@ -23,7 +23,7 @@ server.register(cors_1.default, {
         return callback(null, true);
     }
 });
-server.register(multipart_1.default);
+server.register(multipart_1.default, { throwFileSizeLimit: false });
 // routes
 server.register(routes_1.aboutUsRoute);
 server.register(routes_1.categoriesRoute);
