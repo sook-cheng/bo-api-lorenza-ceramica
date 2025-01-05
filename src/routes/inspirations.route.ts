@@ -13,7 +13,7 @@ export async function inspirationsRoute(fastify: FastifyInstance) {
 
     fastify.post("/add-inspiration", async (request, reply) => {
         const result = await createInspiration(fastify, request.body);
-        reply.code(result?.code!).send({ message: result?.message });
+        reply.code(result?.code!).send({ message: result?.message, id: result?.id });
     });
 
     fastify.post("/update-inspiration", async (request, reply) => {
