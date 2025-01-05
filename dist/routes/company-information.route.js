@@ -10,7 +10,7 @@ async function companyInfoRoute(fastify) {
         const { key } = request.params;
         return await (0, bo_functions_1.getCompanyInfoByKey)(fastify, key);
     });
-    fastify.post("/update-company-info/", async (request, reply) => {
+    fastify.post("/update-company-info", async (request, reply) => {
         const result = await (0, bo_functions_1.updateCompanyInfoByKey)(fastify, request.body);
         reply.code(result?.code).send({ message: result?.message });
     });
