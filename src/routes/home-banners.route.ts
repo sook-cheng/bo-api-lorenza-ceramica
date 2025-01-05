@@ -1,7 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { createHomeBanner, deleteHomeBanners, getAllHomeBanners, getHomeBannerDetailsById, updateHomeBanner, uploadHomeBanner } from "../bo-functions";
 
-export async function productsSideNavsRoute(fastify: FastifyInstance) {
+export async function homeBannersRoute(fastify: FastifyInstance) {
     fastify.get("/all-home-banners", async (request, reply) => {
         return await getAllHomeBanners(fastify);
     });
@@ -13,7 +13,7 @@ export async function productsSideNavsRoute(fastify: FastifyInstance) {
 
     fastify.post("/add-home-banner", async (request, reply) => {
         const result = await createHomeBanner(fastify, request.body);
-        reply.code(result?.code!).send({ message: result?.message });
+        reply.code(result?.code!).send({ message: result?.message, id: result?.id });
     });
 
     fastify.post("/update-home-banner", async (request, reply) => {
@@ -28,7 +28,8 @@ export async function productsSideNavsRoute(fastify: FastifyInstance) {
 
     fastify.post("/upload-home-banner/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const result = await uploadHomeBanner(fastify, id, await request.file({ limits: { fileSize: 100000 } }));
+        const image = await request.file({ limits: { fileSize: 100000 } });
+        const result = await uploadHomeBanner(fastify, id, image);
         reply.code(result?.code!).send({ message: result?.message });
     });
 }

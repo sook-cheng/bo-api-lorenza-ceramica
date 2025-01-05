@@ -34,7 +34,8 @@ export async function inspirationsRoute(fastify: FastifyInstance) {
 
     fastify.post("/upload-inspiration-thumbnail/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const result = await uploadThumbnail(fastify, id, await request.file({ limits: { fileSize: 100000 } }));
+        const image = await request.file({ limits: { fileSize: 100000 } });
+        const result = await uploadThumbnail(fastify, id, image);
         reply.code(result?.code!).send({ message: result?.message });
     });
 

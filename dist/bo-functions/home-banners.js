@@ -76,7 +76,8 @@ const createHomeBanner = async (fastify, data) => {
         const [result] = await connection.execute('INSERT INTO homeBanners (name,sequence,link) VALUES (?,?,?)', [data.name, data.sequence, data.link || null]);
         res = result?.insertId ? {
             code: 201,
-            message: `Home banner created. Created banner Id: ${result.insertId}`
+            message: `Home banner created. Created banner Id: ${result.insertId}`,
+            id: result.insertId
         } : {
             code: 500,
             message: "Internal Server Error."

@@ -30,6 +30,8 @@ server.register(routes_1.categoriesRoute);
 server.register(routes_1.colorsRoute);
 server.register(routes_1.faqRoute);
 server.register(routes_1.finishesRoute);
+server.register(routes_1.homeBannersRoute);
+server.register(routes_1.homePartnersRoute);
 server.register(routes_1.inspirationsRoute);
 server.register(routes_1.productsRoute);
 server.register(routes_1.productsImagesRoute);

@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 export const imagesFolder = '/home/lorenzac/public_html/images';
 
-export const uploadImageFile = (folder: string, file: any) => {
-    pipeline(file, fs.createWriteStream(`${imagesFolder}/${folder}/${file.filename}}`))
+export const uploadImageFile = (folder: string, image: any) => {
+    pipeline(image.file, fs.createWriteStream(`${imagesFolder}/${folder}/${image.filename}}`))
 }
 
 export const removeImageFile = (folder: string, filename: string) => {

@@ -1,6 +1,7 @@
 export * from './about-us';
 export * from './faq';
 export * from './home-banners';
+export * from './home-partners';
 export * from './inspirations';
 export * from './products';
 export * from './products-images';

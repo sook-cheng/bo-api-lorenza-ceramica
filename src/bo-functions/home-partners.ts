@@ -8,18 +8,17 @@ import { formatImageUrl, removeImageFile, uploadImageFile } from "../helpers/ima
 *  id: number
 *  name: string
 *  sequence: number
-*  link?: string
 *  imageUrl: string
 *  createdAt: Date
 *  updatedAt: Date
 * }
 */
-export const getAllHomeBanners = async (fastify: FastifyInstance) => {
+export const getAllHomePartners = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM homeBanners;');
+        const [rows] = await connection.query('SELECT * FROM homePartners;');
         value = rows;
     }
     finally {
@@ -36,19 +35,18 @@ export const getAllHomeBanners = async (fastify: FastifyInstance) => {
 *  id: number
 *  name: string
 *  sequence: number
-*  link?: string
 *  imageUrl: string
 *  createdAt: Date
 *  updatedAt: Date
 *  products: any[]
 * }
 */
-export const getHomeBannerDetailsById = async (fastify: FastifyInstance, id: number) => {
+export const getHomePartnerDetailsById = async (fastify: FastifyInstance, id: number) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM homeBanners WHERE id=?;', [id]);
+        const [rows] = await connection.query('SELECT * FROM homePartners WHERE id=?;', [id]);
         value = rows[0];
     }
     finally {
@@ -63,24 +61,23 @@ export const getHomeBannerDetailsById = async (fastify: FastifyInstance, id: num
  * @param data { 
  *  name: string
  *  sequence: number
- *  link?: string
  * }
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-export const createHomeBanner = async (fastify: FastifyInstance, data: any) => {
+export const createHomePartner = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string, id?: number } = { code: 200, message: "OK." };
 
     try {
-        const [result] = await connection.execute('INSERT INTO homeBanners (name,sequence,link) VALUES (?,?,?)',
-            [data.name, data.sequence, data.link || null]);
+        const [result] = await connection.execute('INSERT INTO homePartners (name,sequence) VALUES (?,?,?)',
+            [data.name, data.sequence]);
 
         res = result?.insertId ? {
             code: 201,
-            message: `Home banner created. Created banner Id: ${result.insertId}`,
+            message: `Home partner created. Created partner Id: ${result.insertId}`,
             id: result.insertId
         } : {
             code: 500,
@@ -106,23 +103,22 @@ export const createHomeBanner = async (fastify: FastifyInstance, data: any) => {
  * @param data { 
  *  name: string
  *  sequence: number
- *  link?: string
  * }
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-export const updateHomeBanner = async (fastify: FastifyInstance, data: any) => {
+export const updateHomePartner = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        const [result] = await connection.execute('UPDATE homeBanners SET name=?, sequence=?, link=? WHERE id=?',
-            [data.name, data.sequence, data.link || null, data.id]);
+        const [result] = await connection.execute('UPDATE homePartners SET name=?, sequence=? WHERE id=?',
+            [data.name, data.sequence, data.id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: `Home banner updated.`
+            message: `Home partner updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -151,12 +147,12 @@ export const updateHomeBanner = async (fastify: FastifyInstance, data: any) => {
  *  message: string,
  * }
  */
-export const uploadHomeBanner = async (fastify: FastifyInstance, id: number, image: any) => {
+export const uploadHomePartner = async (fastify: FastifyInstance, id: number, image: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        const [rows] = await connection.query('SELECT * FROM homeBanners WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM homePartners WHERE id=?', [id]);
 
         if (!rows || rows.length === 0) {
             res = {
@@ -168,15 +164,15 @@ export const uploadHomeBanner = async (fastify: FastifyInstance, id: number, ima
 
         if (rows[0].imageUrl) {
             const oldFile = rows[0].imageUrl.split('/');
-            removeImageFile('home/banners', oldFile[oldFile.length - 1]);
+            removeImageFile('home/partners', oldFile[oldFile.length - 1]);
         }
-        uploadImageFile('home/banners', image);
+        uploadImageFile('home/partners', image);
 
-        const [result] = await connection.execute('UPDATE homeBanners SET imageUrl=? WHERE id=?',
-            [formatImageUrl('home/banners', image.filename), id]);
+        const [result] = await connection.execute('UPDATE homePartners SET imageUrl=? WHERE id=?',
+            [formatImageUrl('home/partners', image.filename), id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: `Home banner updated.`
+            message: `Home partner updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -199,14 +195,14 @@ export const uploadHomeBanner = async (fastify: FastifyInstance, id: number, ima
  * 
  * @param fastify 
  * @param data {
- *  banners: number[]
+ *  partners: number[]
  * }
  *  @returns {
  *  code: number,
  *  message: string,
  * }
  */
-export const deleteHomeBanners = async (fastify: FastifyInstance, data: any) => {
+export const deleteHomePartners = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
@@ -217,7 +213,7 @@ export const deleteHomeBanners = async (fastify: FastifyInstance, data: any) => 
         }
 
         args = args.substring(0, args.length - 1);
-        const [rows] = await connection.query(`SELECT * FROM homeBanners WHERE id IN (${args})`);
+        const [rows] = await connection.query(`SELECT * FROM homePartners WHERE id IN (${args})`);
 
         if (!rows || rows.length === 0) {
             res = {
@@ -230,14 +226,14 @@ export const deleteHomeBanners = async (fastify: FastifyInstance, data: any) => 
         for (const row of rows) {
             if (row.imageUrl) {
                 const oldFile = row.imageUrl.split('/');
-                removeImageFile('home/banners', oldFile[oldFile.length - 1]);
+                removeImageFile('home/partners', oldFile[oldFile.length - 1]);
             }
         }
 
-        const [result] = await connection.execute(`DELETE FROM homeBanners WHERE id IN (${args})`);
+        const [result] = await connection.execute(`DELETE FROM homePartners WHERE id IN (${args})`);
         res = result?.affectedRows > 0 ? {
             code: 204,
-            message: "Home banners removed."
+            message: "Home partners removed."
         } : {
             code: 500,
             message: "Internal Server Error."

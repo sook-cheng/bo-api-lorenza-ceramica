@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.productsSideNavsRoute = productsSideNavsRoute;
+exports.homeBannersRoute = homeBannersRoute;
 const bo_functions_1 = require("../bo-functions");
-async function productsSideNavsRoute(fastify) {
+async function homeBannersRoute(fastify) {
     fastify.get("/all-home-banners", async (request, reply) => {
         return await (0, bo_functions_1.getAllHomeBanners)(fastify);
     });
@@ -12,7 +12,7 @@ async function productsSideNavsRoute(fastify) {
     });
     fastify.post("/add-home-banner", async (request, reply) => {
         const result = await (0, bo_functions_1.createHomeBanner)(fastify, request.body);
-        reply.code(result?.code).send({ message: result?.message });
+        reply.code(result?.code).send({ message: result?.message, id: result?.id });
     });
     fastify.post("/update-home-banner", async (request, reply) => {
         const result = await (0, bo_functions_1.updateHomeBanner)(fastify, request.body);
@@ -24,7 +24,8 @@ async function productsSideNavsRoute(fastify) {
     });
     fastify.post("/upload-home-banner/:id", async (request, reply) => {
         const { id } = request.params;
-        const result = await (0, bo_functions_1.uploadHomeBanner)(fastify, id, await request.file({ limits: { fileSize: 100000 } }));
+        const image = await request.file({ limits: { fileSize: 100000 } });
+        const result = await (0, bo_functions_1.uploadHomeBanner)(fastify, id, image);
         reply.code(result?.code).send({ message: result?.message });
     });
 }
