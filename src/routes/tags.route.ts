@@ -1,9 +1,13 @@
 import { FastifyInstance } from "fastify";
-import { addSubTags, createTag, deleteSubTags, deleteTag, getAllTags, getTagDetailsById, areProductsExistedUnderTag, removeProductsFromTag, updateTag } from "../bo-functions";
+import { addSubTags, createTag, deleteSubTags, deleteTag, getAllTags, getTagDetailsById, areProductsExistedUnderTag, removeProductsFromTag, updateTag, getAllTagsNoLevel } from "../bo-functions";
 
 export async function tagsRoute(fastify: FastifyInstance) {
     fastify.get("/all-tags", async (request, reply) => {
         return await getAllTags(fastify);
+    });
+
+    fastify.get("/all-tags-no-level", async (request, reply) => {
+        return await getAllTagsNoLevel(fastify);
     });
 
     fastify.get("/tag-details/:id", async (request, reply) => {

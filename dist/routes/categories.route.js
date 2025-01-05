@@ -6,6 +6,9 @@ async function categoriesRoute(fastify) {
     fastify.get("/all-categories", async (request, reply) => {
         return await (0, bo_functions_1.getAllCategories)(fastify);
     });
+    fastify.get("/all-categories-no-level", async (request, reply) => {
+        return await (0, bo_functions_1.getAllCategoriesNoLevel)(fastify);
+    });
     fastify.get("/category-details/:id", async (request, reply) => {
         const { id } = request.params;
         return await (0, bo_functions_1.getCategoryDetailsById)(fastify, id);

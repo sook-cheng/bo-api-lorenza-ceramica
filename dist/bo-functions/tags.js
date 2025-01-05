@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeProductsFromTag = exports.deleteSubTags = exports.deleteTag = exports.areProductsExistedUnderTag = exports.addSubTags = exports.updateTag = exports.createTag = exports.getTagDetailsById = exports.getAllTags = void 0;
+exports.removeProductsFromTag = exports.deleteSubTags = exports.deleteTag = exports.areProductsExistedUnderTag = exports.addSubTags = exports.updateTag = exports.createTag = exports.getTagDetailsById = exports.getAllTagsNoLevel = exports.getAllTags = void 0;
 /**
  *
  * @param fastify
@@ -33,6 +33,31 @@ const getAllTags = async (fastify) => {
     }
 };
 exports.getAllTags = getAllTags;
+/**
+ *
+ * @param fastify
+ * @returns {
+*  id: number
+*  name: string
+*  value: string
+*  mainTagId?: number
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+const getAllTagsNoLevel = async (fastify) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value;
+    try {
+        const [rows] = await connection.query('SELECT * FROM tags ORDER BY mainTagId, id;');
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+};
+exports.getAllTagsNoLevel = getAllTagsNoLevel;
 /**
  *
  * @param fastify

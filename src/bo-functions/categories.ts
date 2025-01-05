@@ -36,6 +36,32 @@ export const getAllCategories = async (fastify: FastifyInstance) => {
 /**
  * 
  * @param fastify 
+ * @returns {
+*  id: number
+*  name: string
+*  description: string
+*  mainCategoryId?: number
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+export const getAllCategoriesNoLevel = async (fastify: FastifyInstance) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value: any;
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM categories ORDER BY mainCategoryId, id;');
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
  * @param id
  * @returns {
  *  id: number
@@ -167,7 +193,7 @@ export const updateCategory = async (fastify: FastifyInstance, data: any) => {
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        const [result] = await connection.execute('UPDATE categories SET name=?, description=?, mainCategoryId=? WHERE id=?', 
+        const [result] = await connection.execute('UPDATE categories SET name=?, description=?, mainCategoryId=? WHERE id=?',
             [data.name, data.description, data.mainCategoryId || null, data.Id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
@@ -364,7 +390,7 @@ export const deleteSubCategories = async (fastify: FastifyInstance, data: any) =
         args = args.substring(0, args.length - 1);
         const [rows] = await connection.query(`SELECT categoryId FROM productsCategories WHERE categoryId IN (${args})`);
         const categories = data.categories.filter((id: number) => !rows.find((x: any) => x.categoryId === id));
-        
+
         if (categories.length === 0) {
             res = {
                 code: 400,

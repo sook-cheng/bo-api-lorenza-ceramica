@@ -1,5 +1,6 @@
 export * from './about-us.route';
 export * from './faq.route';
+export * from './inspirations.route';
 export * from './products.route';
 export * from './products-images.route';
 export * from './products-side-navs.route';

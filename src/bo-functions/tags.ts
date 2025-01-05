@@ -36,6 +36,32 @@ export const getAllTags = async (fastify: FastifyInstance) => {
 /**
  * 
  * @param fastify 
+ * @returns {
+*  id: number
+*  name: string
+*  value: string
+*  mainTagId?: number
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+export const getAllTagsNoLevel = async (fastify: FastifyInstance) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value: any;
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM tags ORDER BY mainTagId, id;');
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
  * @param id
  * @returns {
 *  id: number
@@ -168,7 +194,7 @@ export const updateTag = async (fastify: FastifyInstance, data: any) => {
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        const [result] = await connection.execute('UPDATE tags SET name=?, value=?, mainTagId=? WHERE id=?', 
+        const [result] = await connection.execute('UPDATE tags SET name=?, value=?, mainTagId=? WHERE id=?',
             [data.name, data.value, data.mainTagId || null, data.Id]);
         res = result?.affectedRows > 0 ? {
             code: 204,

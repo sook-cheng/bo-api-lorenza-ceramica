@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeProductsFromCategory = exports.deleteSubCategories = exports.deleteCategory = exports.areProductsExistedUnderCategory = exports.addSubCategories = exports.updateCategory = exports.createCategory = exports.getCategoryDetailsById = exports.getAllCategories = void 0;
+exports.removeProductsFromCategory = exports.deleteSubCategories = exports.deleteCategory = exports.areProductsExistedUnderCategory = exports.addSubCategories = exports.updateCategory = exports.createCategory = exports.getCategoryDetailsById = exports.getAllCategoriesNoLevel = exports.getAllCategories = void 0;
 /**
  *
  * @param fastify
@@ -33,6 +33,31 @@ const getAllCategories = async (fastify) => {
     }
 };
 exports.getAllCategories = getAllCategories;
+/**
+ *
+ * @param fastify
+ * @returns {
+*  id: number
+*  name: string
+*  description: string
+*  mainCategoryId?: number
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+const getAllCategoriesNoLevel = async (fastify) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value;
+    try {
+        const [rows] = await connection.query('SELECT * FROM categories ORDER BY mainCategoryId, id;');
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+};
+exports.getAllCategoriesNoLevel = getAllCategoriesNoLevel;
 /**
  *
  * @param fastify
