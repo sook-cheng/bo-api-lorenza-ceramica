@@ -12,7 +12,7 @@ async function inspirationsRoute(fastify) {
     });
     fastify.post("/add-inspiration", async (request, reply) => {
         const result = await (0, bo_functions_1.createInspiration)(fastify, request.body);
-        reply.code(result?.code).send({ message: result?.message });
+        reply.code(result?.code).send({ message: result?.message, id: result?.id });
     });
     fastify.post("/update-inspiration", async (request, reply) => {
         const result = await (0, bo_functions_1.updateInspiration)(fastify, request.body);
