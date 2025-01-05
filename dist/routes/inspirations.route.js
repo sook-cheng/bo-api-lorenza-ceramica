@@ -37,5 +37,15 @@ async function inspirationsRoute(fastify) {
         const result = await (0, bo_functions_1.removeThumbnail)(fastify, id);
         reply.code(result?.code).send({ message: result?.message });
     });
+    fastify.post("/upload-inspirations-images/:id", async (request, reply) => {
+        const { id } = request.params;
+        const images = request.files({ limits: { fileSize: 100000 } });
+        const result = await (0, bo_functions_1.uploadInspirationsImages)(fastify, id, images);
+        reply.code(result?.code).send({ message: result?.message });
+    });
+    fastify.get("/inspirations-images/:id", async (request, reply) => {
+        const { id } = request.params;
+        return await (0, bo_functions_1.getInspirationsImagesById)(fastify, id);
+    });
 }
 //# sourceMappingURL=inspirations.route.js.map

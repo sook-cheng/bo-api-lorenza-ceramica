@@ -365,3 +365,90 @@ export const removeThumbnail = async (fastify: FastifyInstance, id: number) => {
         return res;
     }
 }
+
+/**
+ * 
+ * @param fastify 
+ * @param id
+ * @param images (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ **/
+export const uploadInspirationsImages = async (fastify: FastifyInstance, id: number, images: any) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        const imgs: any[] = [];
+        const [rows] = await connection.query('SELECT id FROM inspirations WHERE id=?', [id]);
+
+        if (!rows || rows.length === 0) {
+            res = {
+                code: 400,
+                message: "Inspiration not found."
+            };
+            return;
+        }
+
+        for await (const i of images) {
+            if (i.type === 'file') {
+                uploadImageFile('inpsirations', i);
+                imgs.push(formatImageUrl('inspirations', i.filename));
+            }
+        }
+
+        let sql = "INSERT INTO inspirationsImages (inspirationId, imageUrl) VALUES ";
+        for (const i of imgs) {
+            sql += `(${id},'${i}'),`;
+        }
+        sql = sql.replaceAll("'null'", "null");
+        sql = sql.substring(0, sql.length - 1);
+        const [result] = await connection.execute(sql);
+        res = result?.affectedRows > 0 ? {
+            code: 201,
+            message: `Inspirations images uploaded.`
+        } : {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param id 
+ * @returns {
+*  id: number
+*  inspirationId: number
+*  imageUrl: string
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+export const getInspirationsImagesById = async (fastify: FastifyInstance, id: number) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value: any;
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM inspirationsImages WHERE inspirationId=?', [id]);
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+}

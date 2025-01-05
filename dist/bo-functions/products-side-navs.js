@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSubSideNavs = exports.deleteSideNav = exports.addSubProductsSideNavs = exports.updateProductsSideNav = exports.createProductsSideNav = exports.getAllProductsSideNavs = exports.getSubProductsSideNavsByMainId = exports.getMainProductsSideNavs = void 0;
+exports.deleteSubSideNavs = exports.deleteSideNav = exports.addSubProductsSideNavs = exports.updateProductsSideNav = exports.createProductsSideNav = exports.getProductsSideNavsDetailsById = exports.getAllProductsSideNavs = exports.getSubProductsSideNavsByMainId = exports.getMainProductsSideNavs = void 0;
 const helpers_1 = require("../helpers");
 /**
  *
@@ -90,6 +90,42 @@ const getAllProductsSideNavs = async (fastify) => {
     }
 };
 exports.getAllProductsSideNavs = getAllProductsSideNavs;
+/**
+ *
+ * @param fastify
+ * @returns {
+ *  id: number,
+ *  name: string,
+ *  path: string,
+ *  tableName: string,
+ *  sequence: number,
+ *  mainSideNavId: number,
+ *  createdAt: Date,
+ *  updatedAt: Date,
+ *  subNavs: any[]
+ * }
+ */
+const getProductsSideNavsDetailsById = async (fastify, id) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value;
+    let subNavs = [];
+    try {
+        const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
+        if (!rows[0].mainSideNavId) {
+            const [subRows] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=?', [id]);
+            subNavs = subRows;
+        }
+        value = {
+            ...rows[0],
+            subNavs,
+        };
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+};
+exports.getProductsSideNavsDetailsById = getProductsSideNavsDetailsById;
 /**
  *
  * @param fastify

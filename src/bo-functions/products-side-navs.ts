@@ -95,6 +95,44 @@ export const getAllProductsSideNavs = async (fastify: FastifyInstance) => {
 /**
  * 
  * @param fastify 
+ * @returns {
+ *  id: number,
+ *  name: string,
+ *  path: string,
+ *  tableName: string,
+ *  sequence: number,
+ *  mainSideNavId: number,
+ *  createdAt: Date,
+ *  updatedAt: Date,
+ *  subNavs: any[]
+ * }
+ */
+export const getProductsSideNavsDetailsById = async (fastify: FastifyInstance, id: number) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value: any;
+    let subNavs = [];
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
+        if (!rows[0].mainSideNavId) {
+            const [subRows] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=?', [id]);
+            subNavs = subRows;
+        }
+
+        value = {
+            ...rows[0],
+            subNavs,
+        };
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
  * @param data {
  *  name: string
  *  path: string

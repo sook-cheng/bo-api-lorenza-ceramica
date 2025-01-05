@@ -13,6 +13,10 @@ async function productsSideNavsRoute(fastify) {
         const { id } = request.params;
         return await (0, bo_functions_1.getSubProductsSideNavsByMainId)(fastify, id);
     });
+    fastify.get("/products-sideNavs-details/:id", async (request, reply) => {
+        const { id } = request.params;
+        return await (0, bo_functions_1.getProductsSideNavsDetailsById)(fastify, id);
+    });
     fastify.post("/add-products-sideNav", async (request, reply) => {
         const result = await (0, bo_functions_1.createProductsSideNav)(fastify, request.body);
         reply.code(result?.code).send({ message: result?.message });

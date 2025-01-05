@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createProductsSideNav, deleteSideNav, deleteSubSideNavs, getAllProductsSideNavs, getMainProductsSideNavs, getSubProductsSideNavsByMainId, updateProductsSideNav } from "../bo-functions";
+import { createProductsSideNav, deleteSideNav, deleteSubSideNavs, getAllProductsSideNavs, getMainProductsSideNavs, getProductsSideNavsDetailsById, getSubProductsSideNavsByMainId, updateProductsSideNav } from "../bo-functions";
 
 export async function productsSideNavsRoute(fastify: FastifyInstance) {
     fastify.get("/all-products-sideNavs", async (request, reply) => {
@@ -13,6 +13,11 @@ export async function productsSideNavsRoute(fastify: FastifyInstance) {
     fastify.get("/all-sub-products-sideNavs/:id", async (request, reply) => {
         const { id }: any = request.params;
         return await getSubProductsSideNavsByMainId(fastify, id);
+    });
+
+    fastify.get("/products-sideNavs-details/:id", async (request, reply) => {
+        const { id }: any = request.params;
+        return await getProductsSideNavsDetailsById(fastify, id);
     });
 
     fastify.post("/add-products-sideNav", async (request, reply) => {
