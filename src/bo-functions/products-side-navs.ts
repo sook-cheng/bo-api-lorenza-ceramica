@@ -138,6 +138,7 @@ export const getProductsSideNavsDetailsById = async (fastify: FastifyInstance, i
  *  tableName: string
  *  sequence: number
  *  mainSideNavId: number
+ *  subSideNavs: any[]
  * }
  * @returns {
  *  code: number,
@@ -169,6 +170,13 @@ export const createProductsSideNav = async (fastify: FastifyInstance, data: any)
 
         const [result] = await connection.execute('INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES (?,?,?,?,?)',
             [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null]);
+
+        if (data.subSideNavs && data.subSideNavs.length > 0 && result?.insertId) {
+            await addSubProductsSideNavs(fastify, {
+                mainSideNavId: result?.insertId,
+                subSideNavs: data.subSideNavs
+            });
+        }
 
         res = result?.insertId ? {
             code: 201,
@@ -215,7 +223,7 @@ export const updateProductsSideNav = async (fastify: FastifyInstance, data: any)
         const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [data.id]);
 
         if (rows && rows.length > 0) {
-            let result: { code: number, message: string } | undefined;
+            // let result: { code: number, message: string } | undefined;
 
             // if (rows[0].tableName !== data.tableName) {
             //     // DELETE existing record
@@ -365,7 +373,7 @@ export const deleteSideNav = async (fastify: FastifyInstance, id: number) => {
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
+        // const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
 
         // const ext = await removeRecordForTableName(fastify, connection, rows[0]);
         // if (ext?.code !== 204) {
@@ -416,7 +424,7 @@ export const deleteSubSideNavs = async (fastify: FastifyInstance, data: any) => 
 
     try {
         // const extResult: { id: number, status: string }[] = [];
-        const [rows] = await connection.query('SELECT * FROM productsSideNavs;');
+        // const [rows] = await connection.query('SELECT * FROM productsSideNavs;');
 
         // for (const id of data.sideNavs) {
         //     const target = rows.find((x: any) => x.id === id);

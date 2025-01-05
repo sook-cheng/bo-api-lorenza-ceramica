@@ -134,6 +134,7 @@ exports.getProductsSideNavsDetailsById = getProductsSideNavsDetailsById;
  *  tableName: string
  *  sequence: number
  *  mainSideNavId: number
+ *  subSideNavs: any[]
  * }
  * @returns {
  *  code: number,
@@ -161,6 +162,12 @@ const createProductsSideNav = async (fastify, data) => {
         //     return;
         // }
         const [result] = await connection.execute('INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES (?,?,?,?,?)', [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null]);
+        if (data.subSideNavs && data.subSideNavs.length > 0 && result?.insertId) {
+            await (0, exports.addSubProductsSideNavs)(fastify, {
+                mainSideNavId: result?.insertId,
+                subSideNavs: data.subSideNavs
+            });
+        }
         res = result?.insertId ? {
             code: 201,
             message: `Side Nav created. Created side nav Id: ${result.insertId}`
@@ -204,7 +211,7 @@ const updateProductsSideNav = async (fastify, data) => {
     try {
         const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [data.id]);
         if (rows && rows.length > 0) {
-            let result;
+            // let result: { code: number, message: string } | undefined;
             // if (rows[0].tableName !== data.tableName) {
             //     // DELETE existing record
             //     result = await removeRecordForTableName(fastify, connection, rows[0]);
@@ -341,7 +348,7 @@ const deleteSideNav = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
+        // const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
         // const ext = await removeRecordForTableName(fastify, connection, rows[0]);
         // if (ext?.code !== 204) {
         //     res = {
@@ -388,7 +395,7 @@ const deleteSubSideNavs = async (fastify, data) => {
     let res = { code: 200, message: "OK." };
     try {
         // const extResult: { id: number, status: string }[] = [];
-        const [rows] = await connection.query('SELECT * FROM productsSideNavs;');
+        // const [rows] = await connection.query('SELECT * FROM productsSideNavs;');
         // for (const id of data.sideNavs) {
         //     const target = rows.find((x: any) => x.id === id);
         //     if (target) {
