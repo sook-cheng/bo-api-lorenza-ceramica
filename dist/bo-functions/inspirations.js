@@ -269,7 +269,7 @@ const uploadThumbnail = async (fastify, id, image) => {
             };
             return;
         }
-        (0, helpers_1.uploadImageFile)('inpsirations', image);
+        (0, helpers_1.uploadImageFile)('inspirations', image);
         const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [(0, helpers_1.formatImageUrl)('inspirations', image.filename), id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
@@ -362,7 +362,7 @@ const uploadInspirationsImages = async (fastify, id, images) => {
         }
         for await (const i of images) {
             if (i.type === 'file') {
-                (0, helpers_1.uploadImageFile)('inpsirations', i);
+                (0, helpers_1.uploadImageFile)('inspirations', i);
                 imgs.push((0, helpers_1.formatImageUrl)('inspirations', i.filename));
             }
         }

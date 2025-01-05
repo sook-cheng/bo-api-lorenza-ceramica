@@ -292,7 +292,7 @@ export const uploadThumbnail = async (fastify: FastifyInstance, id: number, imag
             return;
         }
 
-        uploadImageFile('inpsirations', image);
+        uploadImageFile('inspirations', image);
 
         const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?',
             [formatImageUrl('inspirations', image.filename), id]);
@@ -395,7 +395,7 @@ export const uploadInspirationsImages = async (fastify: FastifyInstance, id: num
 
         for await (const i of images) {
             if (i.type === 'file') {
-                uploadImageFile('inpsirations', i);
+                uploadImageFile('inspirations', i);
                 imgs.push(formatImageUrl('inspirations', i.filename));
             }
         }
