@@ -100,7 +100,7 @@ exports.getTagDetailsById = getTagDetailsById;
 /**
 *
 * @param fastify
-* @param data{
+* @param data {
 *  name: string
 *  value: string
 *  mainTagId?: number
@@ -167,7 +167,7 @@ exports.createTag = createTag;
 /**
 *
 * @param fastify
-* @param data{
+* @param data {
 *  id: number
 *  name: string
 *  value: string
@@ -209,7 +209,7 @@ exports.updateTag = updateTag;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  mainTagId: number
  *  subTags: any[]
  * }

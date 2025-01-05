@@ -104,7 +104,7 @@ export const getCategoryDetailsById = async (fastify: FastifyInstance, id: numbe
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  name: string
  *  description: string
  *  mainCategoryId?: number
@@ -178,7 +178,7 @@ export const createCategory = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  id: number
  *  name: string
  *  description: string
@@ -221,7 +221,7 @@ export const updateCategory = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  mainCategoryId: number
  *  subCategories: any[]
  * }

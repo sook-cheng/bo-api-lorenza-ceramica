@@ -58,7 +58,7 @@ exports.getSizeDetailsById = getSizeDetailsById;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  name: string
  *  value: string
  * }
@@ -104,7 +104,7 @@ exports.createSize = createSize;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  sizes: any[]
  * }
  * @returns {
@@ -164,7 +164,7 @@ exports.createSizes = createSizes;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  name: string
  *  value: string
  * }

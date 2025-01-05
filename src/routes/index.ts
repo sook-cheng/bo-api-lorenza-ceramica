@@ -1,4 +1,5 @@
 export * from './about-us.route';
+export * from './company-information.route';
 export * from './faq.route';
 export * from './home-banners.route';
 export * from './home-partners.route';

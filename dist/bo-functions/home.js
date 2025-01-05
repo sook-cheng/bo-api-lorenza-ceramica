@@ -5,7 +5,7 @@ const image_helper_1 = require("../helpers/image.helper");
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  name: string
  *  sequence: number
  *  link?: string

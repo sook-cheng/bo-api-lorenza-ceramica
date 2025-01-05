@@ -1,5 +1,4 @@
 import { FastifyInstance } from "fastify";
-import { addSubRecordForTableName, createRecordForTableName, removeRecordForTableName, updateRecordForTableName } from "../helpers";
 
 /**
  * 
@@ -159,14 +158,14 @@ export const createProductsSideNav = async (fastify: FastifyInstance, data: any)
             return;
         }
 
-        const ext = await createRecordForTableName(fastify, connection, data);
-        if (ext?.code !== 201) {
-            res = ext || {
-                code: 500,
-                message: "Internal Server Error."
-            };
-            return;
-        }
+        // const ext = await createRecordForTableName(fastify, connection, data);
+        // if (ext?.code !== 201) {
+        //     res = ext || {
+        //         code: 500,
+        //         message: "Internal Server Error."
+        //     };
+        //     return;
+        // }
 
         const [result] = await connection.execute('INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES (?,?,?,?,?)',
             [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null]);
@@ -218,26 +217,26 @@ export const updateProductsSideNav = async (fastify: FastifyInstance, data: any)
         if (rows && rows.length > 0) {
             let result: { code: number, message: string } | undefined;
 
-            if (rows[0].tableName !== data.tableName) {
-                // DELETE existing record
-                result = await removeRecordForTableName(fastify, connection, rows[0]);
+            // if (rows[0].tableName !== data.tableName) {
+            //     // DELETE existing record
+            //     result = await removeRecordForTableName(fastify, connection, rows[0]);
 
-                if (result?.code === 204) {
-                    // INSERT new record
-                    result = await createRecordForTableName(fastify, connection, data);
-                }
-            }
-            else if (rows[0].name !== data.name || rows[0].mainSideNavId !== data.mainSideNavId) {
-                result = await updateRecordForTableName(fastify, connection, data);
-            }
+            //     if (result?.code === 204) {
+            //         // INSERT new record
+            //         result = await createRecordForTableName(fastify, connection, data);
+            //     }
+            // }
+            // else if (rows[0].name !== data.name || rows[0].mainSideNavId !== data.mainSideNavId) {
+            //     result = await updateRecordForTableName(fastify, connection, data);
+            // }
 
-            if (result?.code !== 201 && result?.code !== 204) {
-                res = result || {
-                    code: 500,
-                    message: "Internal Server Error."
-                };
-                return;
-            }
+            // if (result?.code !== 201 && result?.code !== 204) {
+            //     res = result || {
+            //         code: 500,
+            //         message: "Internal Server Error."
+            //     };
+            //     return;
+            // }
 
             const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?",
                 [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId, data.id]);
@@ -308,18 +307,18 @@ export const addSubProductsSideNavs = async (fastify: FastifyInstance, data: any
             return;
         }
 
-        const mainSideNav = rows.find((x: any) => x.id === data.mainSideNavId);
-        const ext = await addSubRecordForTableName(fastify, connection, {
-            ...mainSideNav,
-            subSideNavs,
-        });
-        if (ext?.code !== 201 && ext?.code !== 204) {
-            res = ext || {
-                code: 500,
-                message: "Internal Server Error."
-            };
-            return;
-        }
+        // const mainSideNav = rows.find((x: any) => x.id === data.mainSideNavId);
+        // const ext = await addSubRecordForTableName(fastify, connection, {
+        //     ...mainSideNav,
+        //     subSideNavs,
+        // });
+        // if (ext?.code !== 201 && ext?.code !== 204) {
+        //     res = ext || {
+        //         code: 500,
+        //         message: "Internal Server Error."
+        //     };
+        //     return;
+        // }
 
         let sql = "INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES ";
         for (const sideNav of subSideNavs) {
@@ -368,14 +367,14 @@ export const deleteSideNav = async (fastify: FastifyInstance, id: number) => {
     try {
         const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
 
-        const ext = await removeRecordForTableName(fastify, connection, rows[0]);
-        if (ext?.code !== 204) {
-            res = {
-                code: 400,
-                message: "There are products under this category."
-            }
-            return;
-        }
+        // const ext = await removeRecordForTableName(fastify, connection, rows[0]);
+        // if (ext?.code !== 204) {
+        //     res = {
+        //         code: 400,
+        //         message: "There are products under this category."
+        //     }
+        //     return;
+        // }
 
         const [result] = await connection.execute(`DELETE FROM productsSideNavs WHERE id=?`, [id]);
 
@@ -416,36 +415,40 @@ export const deleteSubSideNavs = async (fastify: FastifyInstance, data: any) => 
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        const extResult: { id: number, status: string }[] = [];
+        // const extResult: { id: number, status: string }[] = [];
         const [rows] = await connection.query('SELECT * FROM productsSideNavs;');
 
-        for (const id of data.sideNavs) {
-            const target = rows.find((x: any) => x.id === id);
+        // for (const id of data.sideNavs) {
+        //     const target = rows.find((x: any) => x.id === id);
 
-            if (target) {
-                const ext = await removeRecordForTableName(fastify, connection, target);
-                extResult.push({
-                    id,
-                    status: ext?.code === 204 ? 'DELETED' : 'FAILED'
-                });
-            }
-        }
+        //     if (target) {
+        //         const ext = await removeRecordForTableName(fastify, connection, target);
+        //         extResult.push({
+        //             id,
+        //             status: ext?.code === 204 ? 'DELETED' : 'FAILED'
+        //         });
+        //     }
+        // }
 
-        if (extResult.filter(x => x.status === 'FAILED').length === data.sideNavs.length) {
-            res = {
-                code: 400,
-                message: "All sub side navs have products."
-            }
-            return;
-        }
+        // if (extResult.filter(x => x.status === 'FAILED').length === data.sideNavs.length) {
+        //     res = {
+        //         code: 400,
+        //         message: "All sub side navs have products."
+        //     }
+        //     return;
+        // }
+
+        // let args = '';
+        // for (const r of extResult) {
+        //     if (r.status === 'DELETED') {
+        //         args = args.concat(`${r.id},`);
+        //     }
+        // }
 
         let args = '';
-        for (const r of extResult) {
-            if (r.status === 'DELETED') {
-                args = args.concat(`${r.id},`);
-            }
+        for (const r of data.sideNavs) {
+            args = args.concat(`${r.id},`);
         }
-
         args = args.substring(0, args.length - 1);
         const [result] = await connection.execute(`DELETE FROM productsSideNavs WHERE id IN (${args})`);
 

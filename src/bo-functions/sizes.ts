@@ -60,7 +60,7 @@ export const getSizeDetailsById = async (fastify: FastifyInstance, id: number) =
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  name: string
  *  value: string
  * }
@@ -110,7 +110,7 @@ export const createSize = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  sizes: any[]
  * }
  * @returns {
@@ -176,7 +176,7 @@ export const createSizes = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  name: string
  *  value: string
  * }

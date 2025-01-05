@@ -60,7 +60,7 @@ export const getColorDetailsById = async (fastify: FastifyInstance, id: number) 
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  name: string
  *  value: string
  * }
@@ -110,7 +110,7 @@ export const createColor = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  colors: any[]
  * }
  * @returns {
@@ -176,7 +176,7 @@ export const createColors = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  name: string
  *  value: string
  * }

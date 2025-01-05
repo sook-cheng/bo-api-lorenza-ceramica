@@ -26,6 +26,7 @@ server.register(cors_1.default, {
 server.register(multipart_1.default, { throwFileSizeLimit: false });
 // routes
 server.register(routes_1.aboutUsRoute);
+server.register(routes_1.companyInfoRoute);
 server.register(routes_1.categoriesRoute);
 server.register(routes_1.colorsRoute);
 server.register(routes_1.faqRoute);

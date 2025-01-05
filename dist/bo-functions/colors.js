@@ -58,7 +58,7 @@ exports.getColorDetailsById = getColorDetailsById;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  name: string
  *  value: string
  * }
@@ -104,7 +104,7 @@ exports.createColor = createColor;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  colors: any[]
  * }
  * @returns {
@@ -164,7 +164,7 @@ exports.createColors = createColors;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  name: string
  *  value: string
  * }

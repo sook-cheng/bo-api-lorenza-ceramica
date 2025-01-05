@@ -60,7 +60,7 @@ export const getFinishDetailsById = async (fastify: FastifyInstance, id: number)
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  name: string
  *  value: string
  * }
@@ -110,7 +110,7 @@ export const createFinish = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  finishes: any[]
  * }
  * @returns {
@@ -176,15 +176,15 @@ export const createFinishes = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  name: string
  *  value: string
  * }
  * @returns {
-*  code: number,
-*  message: string,
-* }
-*/
+ *  code: number,
+ *  message: string,
+ * }
+ */
 export const updateFinish = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string } = { code: 200, message: "OK." };

@@ -104,7 +104,7 @@ export const getTagDetailsById = async (fastify: FastifyInstance, id: number) =>
 /**
 * 
 * @param fastify 
-* @param data{ 
+* @param data { 
 *  name: string
 *  value: string
 *  mainTagId?: number
@@ -179,7 +179,7 @@ export const createTag = async (fastify: FastifyInstance, data: any) => {
 /**
 * 
 * @param fastify 
-* @param data{ 
+* @param data { 
 *  id: number
 *  name: string
 *  value: string
@@ -222,7 +222,7 @@ export const updateTag = async (fastify: FastifyInstance, data: any) => {
 /**
  * 
  * @param fastify 
- * @param data{ 
+ * @param data { 
  *  mainTagId: number
  *  subTags: any[]
  * }

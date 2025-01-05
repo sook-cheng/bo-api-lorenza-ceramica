@@ -100,7 +100,7 @@ exports.getCategoryDetailsById = getCategoryDetailsById;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  name: string
  *  description: string
  *  mainCategoryId?: number
@@ -167,7 +167,7 @@ exports.createCategory = createCategory;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  id: number
  *  name: string
  *  description: string
@@ -209,7 +209,7 @@ exports.updateCategory = updateCategory;
 /**
  *
  * @param fastify
- * @param data{
+ * @param data {
  *  mainCategoryId: number
  *  subCategories: any[]
  * }
