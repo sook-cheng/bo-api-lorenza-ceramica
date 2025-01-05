@@ -83,10 +83,11 @@ const createInspiration = async (fastify, data) => {
             };
             return;
         }
-        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path,thumbnail) VALUES (?,?,?,?,?)', [data.title, data.description, data.content, data.path]);
+        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path) VALUES (?,?,?,?)', [data.title, data.description, data.content, data.path]);
         res = result?.insertId ? {
             code: 201,
-            message: `Inspiration created. Created inspiration Id: ${result.insertId}`
+            message: `Inspiration created. Created inspiration Id: ${result.insertId}`,
+            id: result.insertId,
         } : {
             code: 500,
             message: "Internal Server Error."

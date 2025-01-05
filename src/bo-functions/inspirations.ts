@@ -75,7 +75,7 @@ export const getInspirationDetailsById = async (fastify: FastifyInstance, id: nu
  */
 export const createInspiration = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res: { code: number, message: string } = { code: 200, message: "OK." };
+    let res: { code: number, message: string, id?: number } = { code: 200, message: "OK." };
 
     try {
         const [rows] = await connection.query('SELECT id FROM inspirations WHERE title=?', [data.title]);
@@ -88,12 +88,13 @@ export const createInspiration = async (fastify: FastifyInstance, data: any) => 
             return;
         }
 
-        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path,thumbnail) VALUES (?,?,?,?,?)',
+        const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path) VALUES (?,?,?,?)',
             [data.title, data.description, data.content, data.path]);
 
         res = result?.insertId ? {
             code: 201,
-            message: `Inspiration created. Created inspiration Id: ${result.insertId}`
+            message: `Inspiration created. Created inspiration Id: ${result.insertId}`,
+            id: result.insertId,
         } : {
             code: 500,
             message: "Internal Server Error."
