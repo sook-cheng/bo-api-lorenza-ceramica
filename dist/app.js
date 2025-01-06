@@ -9,6 +9,7 @@ const routes_1 = require("./routes");
 const dotenv_1 = __importDefault(require("dotenv"));
 const mysql_1 = __importDefault(require("@fastify/mysql"));
 const multipart_1 = __importDefault(require("@fastify/multipart"));
+const jwt_1 = __importDefault(require("@fastify/jwt"));
 dotenv_1.default.config();
 const server = (0, fastify_1.default)();
 server.register(mysql_1.default, {
@@ -24,6 +25,7 @@ server.register(cors_1.default, {
     }
 });
 server.register(multipart_1.default, { throwFileSizeLimit: false });
+server.register(jwt_1.default, { secret: 'supersecret' });
 // routes
 server.register(routes_1.aboutUsRoute);
 server.register(routes_1.companyInfoRoute);
@@ -41,6 +43,14 @@ server.register(routes_1.projectCommercialsRoute);
 server.register(routes_1.projectResidentialsRoute);
 server.register(routes_1.sizesRoute);
 server.register(routes_1.tagsRoute);
+server.decorate("authenticate", async function (request, reply) {
+    try {
+        await request.jwtVerify();
+    }
+    catch (err) {
+        reply.send(err);
+    }
+});
 server.listen({ host: '127.0.0.1', port: 8080 }, (err, address) => {
     if (err) {
         console.error(err);

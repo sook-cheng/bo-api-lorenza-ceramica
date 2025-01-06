@@ -1,31 +1,31 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.homeBannersRoute = homeBannersRoute;
-const bo_functions_1 = require("../bo-functions");
+const functions_1 = require("../functions");
 async function homeBannersRoute(fastify) {
     fastify.get("/all-home-banners", async (request, reply) => {
-        return await (0, bo_functions_1.getAllHomeBanners)(fastify);
+        return await (0, functions_1.getAllHomeBanners)(fastify);
     });
     fastify.get("/home-banner-details/:id", async (request, reply) => {
         const { id } = request.params;
-        return await (0, bo_functions_1.getHomeBannerDetailsById)(fastify, id);
+        return await (0, functions_1.getHomeBannerDetailsById)(fastify, id);
     });
     fastify.post("/add-home-banner", async (request, reply) => {
-        const result = await (0, bo_functions_1.createHomeBanner)(fastify, request.body);
+        const result = await (0, functions_1.createHomeBanner)(fastify, request.body);
         reply.code(result?.code).send({ message: result?.message, id: result?.id });
     });
     fastify.post("/update-home-banner", async (request, reply) => {
-        const result = await (0, bo_functions_1.updateHomeBanner)(fastify, request.body);
+        const result = await (0, functions_1.updateHomeBanner)(fastify, request.body);
         reply.code(result?.code).send({ message: result?.message });
     });
     fastify.post("/delete-home-banner", async (request, reply) => {
-        const result = await (0, bo_functions_1.deleteHomeBanners)(fastify, request.body);
+        const result = await (0, functions_1.deleteHomeBanners)(fastify, request.body);
         reply.code(result?.code).send({ message: result?.message });
     });
     fastify.post("/upload-home-banner/:id", async (request, reply) => {
         const { id } = request.params;
         const image = await request.file({ limits: { fileSize: 100000 } });
-        const result = await (0, bo_functions_1.uploadHomeBanner)(fastify, id, image);
+        const result = await (0, functions_1.uploadHomeBanner)(fastify, id, image);
         reply.code(result?.code).send({ message: result?.message });
     });
 }
