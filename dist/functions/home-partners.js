@@ -160,8 +160,8 @@ const uploadHomePartner = async (fastify, id, image) => {
         (0, image_helper_1.uploadImageFile)('home/partners', image);
         const [result] = await connection.execute('UPDATE homePartners SET imageUrl=? WHERE id=?', [(0, image_helper_1.formatImageUrl)('home/partners', image.filename), id]);
         res = result?.affectedRows > 0 ? {
-            code: 204,
-            message: `Home partner updated.`
+            code: 201,
+            message: `Home partner uploaded.`
         } : {
             code: 500,
             message: "Internal Server Error."

@@ -274,8 +274,8 @@ const uploadCommercialThumbnail = async (fastify, id, image) => {
         (0, helpers_1.uploadImageFile)('projects/commercials', image);
         const [result] = await connection.execute('UPDATE projectCommercials SET thumbnail=? WHERE id=?', [(0, helpers_1.formatImageUrl)('projects/commercials', image.filename), id]);
         res = result?.affectedRows > 0 ? {
-            code: 204,
-            message: `Project Commercial thumbnail updated.`
+            code: 201,
+            message: `Project Commercial thumbnail uploaded.`
         } : {
             code: 500,
             message: "Internal Server Error."

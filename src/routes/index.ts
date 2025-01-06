@@ -1,3 +1,4 @@
+export * from './auth.route';
 export * from './about-us.route';
 export * from './company-information.route';
 export * from './faq.route';

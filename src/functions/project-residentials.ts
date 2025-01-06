@@ -299,8 +299,8 @@ export const uploadResidentialThumbnail = async (fastify: FastifyInstance, id: n
         const [result] = await connection.execute('UPDATE projectResidentials SET thumbnail=? WHERE id=?',
             [formatImageUrl('projects/residentials', image.filename), id]);
         res = result?.affectedRows > 0 ? {
-            code: 204,
-            message: `Project Residential thumbnail updated.`
+            code: 201,
+            message: `Project Residential thumbnail uploaded.`
         } : {
             code: 500,
             message: "Internal Server Error."

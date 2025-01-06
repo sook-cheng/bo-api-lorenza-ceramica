@@ -27,6 +27,7 @@ server.register(cors_1.default, {
 server.register(multipart_1.default, { throwFileSizeLimit: false });
 server.register(jwt_1.default, { secret: 'supersecret' });
 // routes
+server.register(routes_1.authRoute);
 server.register(routes_1.aboutUsRoute);
 server.register(routes_1.companyInfoRoute);
 server.register(routes_1.categoriesRoute);

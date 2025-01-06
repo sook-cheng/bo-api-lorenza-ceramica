@@ -274,8 +274,8 @@ const uploadInspirationThumbnail = async (fastify, id, image) => {
         (0, helpers_1.uploadImageFile)('inspirations', image);
         const [result] = await connection.execute('UPDATE inspirations SET thumbnail=? WHERE id=?', [(0, helpers_1.formatImageUrl)('inspirations', image.filename), id]);
         res = result?.affectedRows > 0 ? {
-            code: 204,
-            message: `Inspiration thumbnail updated.`
+            code: 201,
+            message: `Inspiration thumbnail uploaded.`
         } : {
             code: 500,
             message: "Internal Server Error."

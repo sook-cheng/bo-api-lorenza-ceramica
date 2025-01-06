@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = void 0;
+exports.logout = exports.login = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const token_1 = require("./token");
 /**
@@ -14,6 +14,8 @@ const token_1 = require("./token");
  *  password: string
  * }
  * @returns {
+ *  code: number
+ *  message: string
  *  token: ITokenInfo
  * }
  */
@@ -48,10 +50,52 @@ const login = async (fastify, data) => {
             token,
         };
     }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
     finally {
         connection.release();
         return res;
     }
 };
 exports.login = login;
+/**
+ *
+ * @param fastify
+ * @param id
+ * @returns {
+ *  code: number
+ *  message: string
+ * }
+ */
+const logout = async (fastify, id) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res = { code: 200, message: "OK." };
+    try {
+        const [result] = await connection.execute('UPDATE users SET isLoggedIn=0 WHERE id=?', [id]);
+        res = result?.affectedRows > 0 ? {
+            code: 200,
+            message: "Logout successful.",
+        } : {
+            code: 400,
+            message: 'User not found.',
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+};
+exports.logout = logout;
 //# sourceMappingURL=login.js.map

@@ -164,8 +164,8 @@ const uploadHomeBanner = async (fastify, id, image) => {
         (0, image_helper_1.uploadImageFile)('home/banners', image);
         const [result] = await connection.execute('UPDATE homeBanners SET imageUrl=? WHERE id=?', [(0, image_helper_1.formatImageUrl)('home/banners', image.filename), id]);
         res = result?.affectedRows > 0 ? {
-            code: 204,
-            message: `Home banner updated.`
+            code: 201,
+            message: `Home banner uploaded.`
         } : {
             code: 500,
             message: "Internal Server Error."
