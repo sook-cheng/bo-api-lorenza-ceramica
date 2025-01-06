@@ -232,7 +232,7 @@ export const updateCategory = async (fastify: FastifyInstance, data: any) => {
         };
     }
     catch (err) {
-        console.error(err, data);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."

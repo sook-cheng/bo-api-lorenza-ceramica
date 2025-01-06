@@ -219,7 +219,7 @@ const updateCategory = async (fastify, data) => {
         };
     }
     catch (err) {
-        console.error(err, data);
+        console.error(err);
         res = {
             code: 500,
             message: "Internal Server Error."
