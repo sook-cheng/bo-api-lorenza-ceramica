@@ -406,7 +406,14 @@ export const deleteSideNav = async (fastify: FastifyInstance, id: number) => {
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        // const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE id=?', [id]);
+        const [rows] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=?', [id]);
+        if (rows && rows.length > 0) {
+            res = {
+                code: 400,
+                message: "There are sub side navs under this side nav."
+            }
+            return;
+        }
 
         // const ext = await removeRecordForTableName(fastify, connection, rows[0]);
         // if (ext?.code !== 204) {
@@ -490,6 +497,23 @@ export const deleteSubSideNavs = async (fastify: FastifyInstance, data: any) => 
         for (const id of data.sideNavs) {
             args = args.concat(`${id},`);
         }
+        args = args.substring(0, args.length - 1);
+        const [rows] = await connection.query(`SELECT mainSideNavId AS id FROM productsSideNavs WHERE mainSideNavId IN (${args})`);
+        const sideNavs = data.sideNavs.filter((id: number) => !rows.find((x: any) => x.id === id));
+        if (sideNavs.length === 0) {
+            res = {
+                code: 400,
+                message: "There are sub side navs under all the side navs."
+            }
+            return;
+        }
+
+        // DELETE side navs
+        args = '';
+        for (const id of sideNavs) {
+            args = args.concat(`${id},`);
+        }
+
         args = args.substring(0, args.length - 1);
         const [result] = await connection.execute(`DELETE FROM productsSideNavs WHERE id IN (${args})`);
 

@@ -50,7 +50,7 @@ const getAllTagsNoLevel = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT t1.*, t2.name AS mainTagName FROM tags t1 LEFT JOIN tags t2 ON t1.mainTagId = t2.id ORDER BY t1.mainTagId, t2.id;');
+        const [rows] = await connection.query('SELECT t1.*, t2.name AS mainTagName FROM tags t1 LEFT JOIN tags t2 ON t1.mainTagId = t2.id ORDER BY t1.mainTagId, t1.id;');
         value = rows;
     }
     finally {

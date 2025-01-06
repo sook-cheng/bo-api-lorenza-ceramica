@@ -28,8 +28,8 @@ server.register(cors, {
 server.register(fastifyMultipart, { throwFileSizeLimit: false });
 server.register(fastifyJwt, {
     secret: {
-        private: fs.readFileSync(path.join(__dirname, '/keys/access_private.key'), 'utf8',),
-        public: fs.readFileSync(path.join(__dirname, '/keys/access_public.key'), 'utf8',),
+        private: fs.readFileSync(path.join(__dirname, '../keys/access_private.key'), 'utf8',),
+        public: fs.readFileSync(path.join(__dirname, '../keys/access_public.key'), 'utf8',),
     }
 });
 
