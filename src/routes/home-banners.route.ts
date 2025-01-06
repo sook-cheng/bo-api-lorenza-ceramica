@@ -28,7 +28,7 @@ export async function homeBannersRoute(fastify: FastifyInstance) {
 
     fastify.post("/upload-home-banner/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const image = await request.file({ limits: { fileSize: 100000 } });
+        const image = await request.file({ limits: { fileSize: 10000000 } });
         const result = await uploadHomeBanner(fastify, id, image);
         reply.code(result?.code!).send({ message: result?.message });
     });

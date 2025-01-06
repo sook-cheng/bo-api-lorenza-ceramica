@@ -34,7 +34,7 @@ export async function projectCommercialsRoute(fastify: FastifyInstance) {
 
     fastify.post("/upload-commercial-thumbnail/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const image = await request.file({ limits: { fileSize: 100000 } });
+        const image = await request.file({ limits: { fileSize: 10000000 } });
         const result = await uploadCommercialThumbnail(fastify, id, image);
         reply.code(result?.code!).send({ message: result?.message });
     });
@@ -47,7 +47,7 @@ export async function projectCommercialsRoute(fastify: FastifyInstance) {
 
     fastify.post("/upload-project-commercials-images/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const images = request.files({ limits: { fileSize: 100000 } });
+        const images = request.files({ limits: { fileSize: 10000000 } });
         const result = await uploadProjectCommercialsImages(fastify, id, images);
         reply.code(result?.code!).send({ message: result?.message });
     });

@@ -29,7 +29,7 @@ async function projectCommercialsRoute(fastify) {
     });
     fastify.post("/upload-commercial-thumbnail/:id", async (request, reply) => {
         const { id } = request.params;
-        const image = await request.file({ limits: { fileSize: 100000 } });
+        const image = await request.file({ limits: { fileSize: 10000000 } });
         const result = await (0, functions_1.uploadCommercialThumbnail)(fastify, id, image);
         reply.code(result?.code).send({ message: result?.message });
     });
@@ -40,7 +40,7 @@ async function projectCommercialsRoute(fastify) {
     });
     fastify.post("/upload-project-commercials-images/:id", async (request, reply) => {
         const { id } = request.params;
-        const images = request.files({ limits: { fileSize: 100000 } });
+        const images = request.files({ limits: { fileSize: 10000000 } });
         const result = await (0, functions_1.uploadProjectCommercialsImages)(fastify, id, images);
         reply.code(result?.code).send({ message: result?.message });
     });

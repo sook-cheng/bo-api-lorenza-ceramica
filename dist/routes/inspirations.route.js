@@ -29,7 +29,7 @@ async function inspirationsRoute(fastify) {
     });
     fastify.post("/upload-inspiration-thumbnail/:id", async (request, reply) => {
         const { id } = request.params;
-        const image = await request.file({ limits: { fileSize: 100000 } });
+        const image = await request.file({ limits: { fileSize: 10000000 } });
         const result = await (0, functions_1.uploadInspirationThumbnail)(fastify, id, image);
         reply.code(result?.code).send({ message: result?.message });
     });
@@ -40,7 +40,7 @@ async function inspirationsRoute(fastify) {
     });
     fastify.post("/upload-inspirations-images/:id", async (request, reply) => {
         const { id } = request.params;
-        const images = request.files({ limits: { fileSize: 100000 } });
+        const images = request.files({ limits: { fileSize: 10000000 } });
         const result = await (0, functions_1.uploadInspirationsImages)(fastify, id, images);
         reply.code(result?.code).send({ message: result?.message });
     });

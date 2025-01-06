@@ -24,7 +24,7 @@ async function homePartnersRoute(fastify) {
     });
     fastify.post("/upload-home-partner/:id", async (request, reply) => {
         const { id } = request.params;
-        const image = await request.file({ limits: { fileSize: 100000 } });
+        const image = await request.file({ limits: { fileSize: 10000000 } });
         const result = await (0, functions_1.uploadHomePartner)(fastify, id, image);
         reply.code(result?.code).send({ message: result?.message });
     });

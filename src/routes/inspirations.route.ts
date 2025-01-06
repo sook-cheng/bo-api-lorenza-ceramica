@@ -34,7 +34,7 @@ export async function inspirationsRoute(fastify: FastifyInstance) {
 
     fastify.post("/upload-inspiration-thumbnail/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const image = await request.file({ limits: { fileSize: 100000 } });
+        const image = await request.file({ limits: { fileSize: 10000000 } });
         const result = await uploadInspirationThumbnail(fastify, id, image);
         reply.code(result?.code!).send({ message: result?.message });
     });
@@ -47,7 +47,7 @@ export async function inspirationsRoute(fastify: FastifyInstance) {
 
     fastify.post("/upload-inspirations-images/:id", async (request, reply) => {
         const { id }: any = request.params;
-        const images = request.files({ limits: { fileSize: 100000 } });
+        const images = request.files({ limits: { fileSize: 10000000 } });
         const result = await uploadInspirationsImages(fastify, id, images);
         reply.code(result?.code!).send({ message: result?.message });
     });

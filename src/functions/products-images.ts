@@ -35,7 +35,7 @@ export const uploadProductsImages = async (fastify: FastifyInstance, id: number,
             if (i.type === 'file') {
                 const type = i.filename.split('.');
                 sequence += 1;
-                pipeline(i.file, fs.createWriteStream(`${imagesFolder}/products/${products[0].name}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`))
+                pipeline(i.file, fs.createWriteStream(`${imagesFolder}/products/${products[0].name}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`, { highWaterMark: 10 * 1024 * 1024 }))
                 imgs.push({
                     sequence,
                     type: type[type.length - 1].toLowerCase(),
@@ -103,7 +103,7 @@ export const uploadMockedImages = async (fastify: FastifyInstance, id: number, i
            if (i.type === 'file') {
                const type = i.filename.split('.');
                sequence += 1;
-               pipeline(i.file, fs.createWriteStream(`${imagesFolder}/products/${products[0].name}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`))
+               pipeline(i.file, fs.createWriteStream(`${imagesFolder}/products/${products[0].name}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`, { highWaterMark: 10 * 1024 * 1024 }))
                imgs.push({
                    sequence,
                    type: type[type.length - 1].toLowerCase(),
