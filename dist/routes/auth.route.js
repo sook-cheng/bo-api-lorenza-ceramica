@@ -6,7 +6,7 @@ const users_1 = require("../auth/users");
 async function authRoute(fastify) {
     fastify.post("/login", async (request, reply) => {
         const result = await (0, login_1.login)(fastify, request.body);
-        reply.code(result?.code).send({ message: result?.message, token: result?.token });
+        reply.code(result?.code).send({ message: result?.message, token: result?.token, id: result?.id });
     });
     fastify.get("/get-user/:id", async (request, reply) => {
         const { id } = request.params;

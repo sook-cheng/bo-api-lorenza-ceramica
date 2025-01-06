@@ -5,7 +5,7 @@ import { getUserInfoById } from "../auth/users";
 export async function authRoute(fastify: FastifyInstance) {
     fastify.post("/login", async (request, reply) => {
         const result = await login(fastify, request.body);
-        reply.code(result?.code!).send({ message: result?.message, token: result?.token });
+        reply.code(result?.code!).send({ message: result?.message, token: result?.token, id: result?.id });
     });
 
     fastify.get("/get-user/:id", async (request, reply) => {
