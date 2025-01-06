@@ -248,14 +248,14 @@ export const updateProductsSideNav = async (fastify: FastifyInstance, data: any)
             // }
 
             const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?",
-                [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId, data.id]);
+                [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
 
             const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=? ORDER BY sequence', [data.id]);
             let addSubs: any[] = [];
             let editSubs: any[] = [];
             let deleteSubs: any[] = [];
 
-            if (data.subSideNavs && data.subSideNavs.length > 0 && data.mainSideNavId) {
+            if (data.subSideNavs && data.subSideNavs.length > 0) {
                 if (subs && subs.length > 0) {
                     addSubs = data.subSideNavs.filter((x: any) => !subs.find((y: any) => y.name === x.name));
                     editSubs = data.subSideNavs.filter((x: any) => subs.find((y: any) => y.name === x.name));
@@ -271,17 +271,17 @@ export const updateProductsSideNav = async (fastify: FastifyInstance, data: any)
                     deleteSubs = subs.map((x: any) => x.id);
                 }
             }
-
+            
             if (addSubs.length > 0) await addSubProductsSideNavs(fastify, { mainSideNavId: data.id, subSideNavs: addSubs });
             if (deleteSubs.length > 0) await deleteSubSideNavs(fastify, { sideNavs: deleteSubs });
 
             if (editSubs.length > 0) {
                 for (const d of editSubs) {
-                    await connection.execute("UPDATE productsSideNavs SET sequence=? WHERE id=?", [d.sequence, d.id]);
+                    await connection.execute("UPDATE productsSideNavs SET sequence=? WHERE name=?", [d.sequence, d.name]);
                 }
             }
 
-            res = updated?.insertId ? {
+            res = updated?.affectedRows > 0 ? {
                 code: 204,
                 message: "Product Side Navs updated."
             } : {
@@ -487,8 +487,8 @@ export const deleteSubSideNavs = async (fastify: FastifyInstance, data: any) => 
         // }
 
         let args = '';
-        for (const r of data.sideNavs) {
-            args = args.concat(`${r.id},`);
+        for (const id of data.sideNavs) {
+            args = args.concat(`${id},`);
         }
         args = args.substring(0, args.length - 1);
         const [result] = await connection.execute(`DELETE FROM productsSideNavs WHERE id IN (${args})`);
