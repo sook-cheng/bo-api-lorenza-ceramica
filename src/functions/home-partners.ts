@@ -72,7 +72,7 @@ export const createHomePartner = async (fastify: FastifyInstance, data: any) => 
     let res: { code: number, message: string, id?: number } = { code: 200, message: "OK." };
 
     try {
-        const [result] = await connection.execute('INSERT INTO homePartners (name,sequence) VALUES (?,?,?)',
+        const [result] = await connection.execute('INSERT INTO homePartners (name,sequence) VALUES (?,?)',
             [data.name, data.sequence]);
 
         res = result?.insertId ? {

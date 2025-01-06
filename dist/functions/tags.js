@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeProductsFromTag = exports.deleteSubTags = exports.deleteTag = exports.areProductsExistedUnderTag = exports.addSubTags = exports.updateTag = exports.createTag = exports.getTagDetailsById = exports.getAllTagsNoLevel = exports.getAllTags = void 0;
+exports.removeProductsFromTag = exports.deleteSubTags = exports.deleteTag = exports.areProductsExistedUnderTag = exports.addSubTags = exports.updateTag = exports.createTag = exports.getTagDetailsById = exports.getMainTagsWithoutSub = exports.getAllTagsNoLevel = exports.getAllTags = void 0;
 /**
  *
  * @param fastify
@@ -59,6 +59,31 @@ const getAllTagsNoLevel = async (fastify) => {
     }
 };
 exports.getAllTagsNoLevel = getAllTagsNoLevel;
+/**
+ *
+ * @param fastify
+ * @returns {
+*  id: number
+*  name: string
+*  description: string
+*  mainTagId?: number
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+const getMainTagsWithoutSub = async (fastify) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value;
+    try {
+        const [rows] = await connection.query('SELECT * FROM tags WHERE mainTagId IS NULL AND id NOT IN (SELECT DISTINCT mainTagId FROM tags WHERE mainTagId IS NOT NULL) ORDER BY id;');
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+};
+exports.getMainTagsWithoutSub = getMainTagsWithoutSub;
 /**
  *
  * @param fastify

@@ -70,7 +70,7 @@ const createHomePartner = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [result] = await connection.execute('INSERT INTO homePartners (name,sequence) VALUES (?,?,?)', [data.name, data.sequence]);
+        const [result] = await connection.execute('INSERT INTO homePartners (name,sequence) VALUES (?,?)', [data.name, data.sequence]);
         res = result?.insertId ? {
             code: 201,
             message: `Home partner created. Created partner Id: ${result.insertId}`,

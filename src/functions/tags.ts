@@ -63,6 +63,32 @@ export const getAllTagsNoLevel = async (fastify: FastifyInstance) => {
 /**
  * 
  * @param fastify 
+ * @returns {
+*  id: number
+*  name: string
+*  description: string
+*  mainTagId?: number
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+export const getMainTagsWithoutSub = async (fastify: FastifyInstance) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value: any;
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM tags WHERE mainTagId IS NULL AND id NOT IN (SELECT DISTINCT mainTagId FROM tags WHERE mainTagId IS NOT NULL) ORDER BY id;');
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
  * @param id
  * @returns {
 *  id: number

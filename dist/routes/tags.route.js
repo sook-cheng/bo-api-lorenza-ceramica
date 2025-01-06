@@ -9,6 +9,9 @@ async function tagsRoute(fastify) {
     fastify.get("/all-tags-no-level", async (request, reply) => {
         return await (0, functions_1.getAllTagsNoLevel)(fastify);
     });
+    fastify.get("/main-tags-no-sub", async (request, reply) => {
+        return await (0, functions_1.getMainTagsWithoutSub)(fastify);
+    });
     fastify.get("/tag-details/:id", async (request, reply) => {
         const { id } = request.params;
         return await (0, functions_1.getTagDetailsById)(fastify, id);

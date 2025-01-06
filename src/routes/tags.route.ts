@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { addSubTags, createTag, deleteSubTags, deleteTag, getAllTags, getTagDetailsById, areProductsExistedUnderTag, removeProductsFromTag, updateTag, getAllTagsNoLevel } from "../functions";
+import { addSubTags, createTag, deleteSubTags, deleteTag, getAllTags, getTagDetailsById, areProductsExistedUnderTag, removeProductsFromTag, updateTag, getAllTagsNoLevel, getMainTagsWithoutSub } from "../functions";
 
 export async function tagsRoute(fastify: FastifyInstance) {
     fastify.get("/all-tags", async (request, reply) => {
@@ -9,6 +9,10 @@ export async function tagsRoute(fastify: FastifyInstance) {
     fastify.get("/all-tags-no-level", async (request, reply) => {
         return await getAllTagsNoLevel(fastify);
     });
+
+    fastify.get("/main-tags-no-sub", async (request, reply) => {
+            return await getMainTagsWithoutSub(fastify);
+        });
 
     fastify.get("/tag-details/:id", async (request, reply) => {
         const { id }: any = request.params;
