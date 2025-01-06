@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import fastifyMysql from '@fastify/mysql';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyJwt from '@fastify/jwt';
+import path from 'path';
+import fs from 'fs';
 
 dotenv.config();
 const server = fastify();
@@ -24,7 +26,12 @@ server.register(cors, {
 });
 
 server.register(fastifyMultipart, { throwFileSizeLimit: false });
-server.register(fastifyJwt, { secret: 'supersecret' });
+server.register(fastifyJwt, {
+    secret: {
+        private: fs.readFileSync(path.join(__dirname, '/keys/access_private.key'), 'utf8',),
+        public: fs.readFileSync(path.join(__dirname, '/keys/access_public.key'), 'utf8',),
+    }
+});
 
 // routes
 server.register(authRoute);

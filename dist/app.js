@@ -10,6 +10,8 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const mysql_1 = __importDefault(require("@fastify/mysql"));
 const multipart_1 = __importDefault(require("@fastify/multipart"));
 const jwt_1 = __importDefault(require("@fastify/jwt"));
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 dotenv_1.default.config();
 const server = (0, fastify_1.default)();
 server.register(mysql_1.default, {
@@ -25,7 +27,12 @@ server.register(cors_1.default, {
     }
 });
 server.register(multipart_1.default, { throwFileSizeLimit: false });
-server.register(jwt_1.default, { secret: 'supersecret' });
+server.register(jwt_1.default, {
+    secret: {
+        private: fs_1.default.readFileSync(path_1.default.join(__dirname, '/keys/access_private.key'), 'utf8'),
+        public: fs_1.default.readFileSync(path_1.default.join(__dirname, '/keys/access_public.key'), 'utf8'),
+    }
+});
 // routes
 server.register(routes_1.authRoute);
 server.register(routes_1.aboutUsRoute);
