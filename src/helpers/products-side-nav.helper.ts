@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { addSubCategories, addSubTags, createCategory, createColor, createColors, createFinish, createFinishes, createSize, createSizes, createTag, deleteCategory, deleteColor, deleteFinish, deleteSize, deleteTag, updateCategory, updateColor, updateFinish, updateSize, updateTag } from '../bo-functions';
+import { addSubCategories, addSubTags, createCategory, createColor, createColors, createFinish, createFinishes, createSize, createSizes, createTag, deleteCategory, deleteColor, deleteFinish, deleteSize, deleteTag, updateCategory, updateColor, updateFinish, updateSize, updateTag } from '../functions';
 
 export const createRecordForTableName = async (fastify: FastifyInstance, connection: any, data: any) => {
     let result: { code: number, message: string } | undefined;

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createHomePartner, deleteHomePartners, getAllHomePartners, getHomePartnerDetailsById, updateHomePartner, uploadHomePartner } from "../bo-functions";
+import { createHomePartner, deleteHomePartners, getAllHomePartners, getHomePartnerDetailsById, updateHomePartner, uploadHomePartner } from "../functions";
 
 export async function homePartnersRoute(fastify: FastifyInstance) {
     fastify.get("/all-home-partners", async (request, reply) => {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createQuestion, createSection, deleteQuestions, deleteSection, getAllQuestions, getAllSections, getQuestionDetailsById, getSectionDetailsById, updateQuestion, updateSection } from "../bo-functions";
+import { createQuestion, createSection, deleteQuestions, deleteSection, getAllQuestions, getAllSections, getQuestionDetailsById, getSectionDetailsById, updateQuestion, updateSection } from "../functions";
 
 export async function faqRoute(fastify: FastifyInstance) {
     fastify.get("/all-faq-sections", async (request, reply) => {

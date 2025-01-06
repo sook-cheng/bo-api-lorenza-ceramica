@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { areProductsExistedUnderFinish, createFinish, createFinishes, deleteFinish, deleteFinishes, getAllFinishes, getFinishDetailsById, updateFinish } from "../bo-functions";
+import { areProductsExistedUnderFinish, createFinish, createFinishes, deleteFinish, deleteFinishes, getAllFinishes, getFinishDetailsById, updateFinish } from "../functions";
 
 export async function finishesRoute(fastify: FastifyInstance) {
     fastify.get("/all-finishes", async (request, reply) => {

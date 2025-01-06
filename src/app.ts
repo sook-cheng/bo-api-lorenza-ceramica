@@ -4,6 +4,7 @@ import { aboutUsRoute, categoriesRoute, colorsRoute, companyInfoRoute, faqRoute,
 import dotenv from 'dotenv';
 import fastifyMysql from '@fastify/mysql';
 import fastifyMultipart from '@fastify/multipart';
+import fastifyJwt from '@fastify/jwt';
 
 dotenv.config();
 const server = fastify();
@@ -23,6 +24,7 @@ server.register(cors, {
 });
 
 server.register(fastifyMultipart, { throwFileSizeLimit: false });
+server.register(fastifyJwt, { secret: 'supersecret' });
 
 // routes
 server.register(aboutUsRoute);
@@ -41,6 +43,14 @@ server.register(projectCommercialsRoute);
 server.register(projectResidentialsRoute);
 server.register(sizesRoute);
 server.register(tagsRoute);
+
+server.decorate("authenticate", async function (request, reply) {
+    try {
+        await request.jwtVerify()
+    } catch (err) {
+        reply.send(err)
+    }
+})
 
 server.listen({ host: '127.0.0.1', port: 8080 }, (err, address) => {
     if (err) {

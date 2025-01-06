@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { removeProductsImages, uploadMockedImages, uploadProductsImages } from "../bo-functions";
+import { removeProductsImages, uploadMockedImages, uploadProductsImages } from "../functions";
 
 export async function productsImagesRoute(fastify: FastifyInstance) {
     fastify.post("/upload-products-images/:id", async (request, reply) => {

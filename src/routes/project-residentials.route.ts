@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createProjectResidential, deleteProjectResidential, deleteProjectResidentials, getAllProjectResidentials, getProjectResidentialDetailsById, getProjectResidentialsImagesById, removeResidentialThumbnail, updateProjectResidential, uploadResidentialThumbnail, uploadProjectResidentialsImages } from "../bo-functions";
+import { createProjectResidential, deleteProjectResidential, deleteProjectResidentials, getAllProjectResidentials, getProjectResidentialDetailsById, getProjectResidentialsImagesById, removeResidentialThumbnail, updateProjectResidential, uploadResidentialThumbnail, uploadProjectResidentialsImages } from "../functions";
 
 export async function projectResidentialsRoute(fastify: FastifyInstance) {
     fastify.get("/all-project-residentials", async (request, reply) => {

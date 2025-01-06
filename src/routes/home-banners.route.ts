@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createHomeBanner, deleteHomeBanners, getAllHomeBanners, getHomeBannerDetailsById, updateHomeBanner, uploadHomeBanner } from "../bo-functions";
+import { createHomeBanner, deleteHomeBanners, getAllHomeBanners, getHomeBannerDetailsById, updateHomeBanner, uploadHomeBanner } from "../functions";
 
 export async function homeBannersRoute(fastify: FastifyInstance) {
     fastify.get("/all-home-banners", async (request, reply) => {

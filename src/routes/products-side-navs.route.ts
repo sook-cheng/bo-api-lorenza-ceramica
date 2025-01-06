@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createProductsSideNav, deleteSideNav, deleteSubSideNavs, getAllProductsSideNavs, getMainProductsSideNavs, getProductsSideNavsDetailsById, getSubProductsSideNavsByMainId, updateProductsSideNav } from "../bo-functions";
+import { createProductsSideNav, deleteSideNav, deleteSubSideNavs, getAllProductsSideNavs, getMainProductsSideNavs, getProductsSideNavsDetailsById, getSubProductsSideNavsByMainId, updateProductsSideNav } from "../functions";
 
 export async function productsSideNavsRoute(fastify: FastifyInstance) {
     fastify.get("/all-products-sideNavs", async (request, reply) => {

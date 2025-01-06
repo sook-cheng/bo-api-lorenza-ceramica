@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { getAllCompanyInfo, getCompanyInfoByKey, updateCompanyInfoByKey } from "../bo-functions";
+import { getAllCompanyInfo, getCompanyInfoByKey, updateCompanyInfoByKey } from "../functions";
 
 export async function companyInfoRoute(fastify: FastifyInstance) {
     fastify.get("/all-company-info", async (request, reply) => {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { areProductsExistedUnderColor, createColor, createColors, deleteColor, deleteColors, getAllColors, getColorDetailsById, updateColor } from "../bo-functions";
+import { areProductsExistedUnderColor, createColor, createColors, deleteColor, deleteColors, getAllColors, getColorDetailsById, updateColor } from "../functions";
 
 export async function colorsRoute(fastify: FastifyInstance) {
     fastify.get("/all-colors", async (request, reply) => {

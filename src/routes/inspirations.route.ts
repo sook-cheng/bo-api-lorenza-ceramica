@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createInspiration, deleteInspiration, deleteInspirations, getAllInspirations, getInspirationDetailsById, getInspirationsImagesById, removeInspirationThumbnail, updateInspiration, uploadInspirationsImages, uploadInspirationThumbnail } from "../bo-functions";
+import { createInspiration, deleteInspiration, deleteInspirations, getAllInspirations, getInspirationDetailsById, getInspirationsImagesById, removeInspirationThumbnail, updateInspiration, uploadInspirationsImages, uploadInspirationThumbnail } from "../functions";
 
 export async function inspirationsRoute(fastify: FastifyInstance) {
     fastify.get("/all-inspirations", async (request, reply) => {

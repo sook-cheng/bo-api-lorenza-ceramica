@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createProjectCommercial, deleteProjectCommercial, deleteProjectCommercials, getAllProjectCommercials, getProjectCommercialDetailsById, getProjectCommercialsImagesById, removeCommercialThumbnail, updateProjectCommercial, uploadCommercialThumbnail, uploadProjectCommercialsImages } from "../bo-functions";
+import { createProjectCommercial, deleteProjectCommercial, deleteProjectCommercials, getAllProjectCommercials, getProjectCommercialDetailsById, getProjectCommercialsImagesById, removeCommercialThumbnail, updateProjectCommercial, uploadCommercialThumbnail, uploadProjectCommercialsImages } from "../functions";
 
 export async function projectCommercialsRoute(fastify: FastifyInstance) {
     fastify.get("/all-project-commercials", async (request, reply) => {

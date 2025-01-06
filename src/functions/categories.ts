@@ -12,7 +12,7 @@ import { FastifyInstance } from "fastify";
  *  updatedAt: Date
  *  subCategories: any[]
  * }
-*/
+ */
 export const getAllCategories = async (fastify: FastifyInstance) => {
     const connection = await fastify['mysql'].getConnection();
     let value: any;
@@ -26,6 +26,32 @@ export const getAllCategories = async (fastify: FastifyInstance) => {
                 subCategories: rows.filter((y: any) => y.mainCategoryId === x.id),
             }
         });
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @returns {
+ *  id: number
+ *  name: string
+ *  description: string
+ *  mainCategoryId?: number
+ *  createdAt: Date
+ *  updatedAt: Date
+ * }
+ */
+export const getMainCategoriesWithoutSub = async (fastify: FastifyInstance) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value: any;
+
+    try {
+        const [rows] = await connection.query('SELECT * FROM categories WHERE mainCategoryId IS NULL AND id NOT IN (SELECT DISTINCT mainCategoryId FROM categories WHERE mainCategoryId IS NOT NULL) ORDER BY id;');
+        value = rows;
     }
     finally {
         connection.release();

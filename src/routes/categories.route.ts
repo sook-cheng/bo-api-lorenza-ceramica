@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { addSubCategories, createCategory, deleteCategory, deleteSubCategories, getAllCategories, getCategoryDetailsById, areProductsExistedUnderCategory, removeProductsFromCategory, updateCategory, getAllCategoriesNoLevel } from "../bo-functions";
+import { addSubCategories, createCategory, deleteCategory, deleteSubCategories, getAllCategories, getCategoryDetailsById, areProductsExistedUnderCategory, removeProductsFromCategory, updateCategory, getAllCategoriesNoLevel, getMainCategoriesWithoutSub } from "../functions";
 
 export async function categoriesRoute(fastify: FastifyInstance) {
     fastify.get("/all-categories", async (request, reply) => {
@@ -8,6 +8,10 @@ export async function categoriesRoute(fastify: FastifyInstance) {
 
     fastify.get("/all-categories-no-level", async (request, reply) => {
         return await getAllCategoriesNoLevel(fastify);
+    });
+
+    fastify.get("/main-categories-no-sub", async (request, reply) => {
+        return await getMainCategoriesWithoutSub(fastify);
     });
 
     fastify.get("/category-details/:id", async (request, reply) => {

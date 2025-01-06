@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { addSubTags, createTag, deleteSubTags, deleteTag, getAllTags, getTagDetailsById, areProductsExistedUnderTag, removeProductsFromTag, updateTag, getAllTagsNoLevel } from "../bo-functions";
+import { addSubTags, createTag, deleteSubTags, deleteTag, getAllTags, getTagDetailsById, areProductsExistedUnderTag, removeProductsFromTag, updateTag, getAllTagsNoLevel } from "../functions";
 
 export async function tagsRoute(fastify: FastifyInstance) {
     fastify.get("/all-tags", async (request, reply) => {

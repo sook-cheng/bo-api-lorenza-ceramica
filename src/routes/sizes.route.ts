@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { areProductsExistedUnderSize, createSize, createSizes, deleteSize, deleteSizes, getAllSizes, getSizeDetailsById, updateSize } from "../bo-functions";
+import { areProductsExistedUnderSize, createSize, createSizes, deleteSize, deleteSizes, getAllSizes, getSizeDetailsById, updateSize } from "../functions";
 
 export async function sizesRoute(fastify: FastifyInstance) {
     fastify.get("/all-sizes", async (request, reply) => {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { addProduct, assignProductToCategories, assignProductToTags, getProductDetailsById, getProducts, removeCategoriesForProduct, removeProduct, removeProducts, removeTagsForProduct, updateProduct } from "../bo-functions";
+import { addProduct, assignProductToCategories, assignProductToTags, getProductDetailsById, getProducts, removeCategoriesForProduct, removeProduct, removeProducts, removeTagsForProduct, updateProduct } from "../functions";
 
 export async function productsRoute(fastify: FastifyInstance) {
     fastify.post("/add-product", async (request, reply) => {
