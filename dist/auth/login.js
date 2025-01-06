@@ -40,7 +40,7 @@ const login = async (fastify, data) => {
                 };
             }
         }
-        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP() isLoggedIn=? WHERE username=?', [1, data.username]);
+        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP(), isLoggedIn=? WHERE username=?', [1, data.username]);
         const token = (0, token_1.generateToken)({
             ...rows[0],
             lastLoginDate: Date.now()

@@ -40,7 +40,7 @@ export const login = async (fastify: FastifyInstance, data: any) => {
             }
         }
 
-        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP() isLoggedIn=? WHERE username=?',[1, data.username]);
+        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP(), isLoggedIn=? WHERE username=?',[1, data.username]);
         const token = generateToken({
             ...rows[0],
             lastLoginDate: Date.now()
