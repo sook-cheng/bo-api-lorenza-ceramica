@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.logout = exports.login = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const base_64_1 = require("base-64");
 const token_1 = require("./token");
 /**
  *
@@ -31,7 +32,7 @@ const login = async (fastify, data) => {
             };
         }
         if (rows[0].password) {
-            const verifyPw = await bcrypt_1.default.compare(data.password, rows[0].password);
+            const verifyPw = await bcrypt_1.default.compare((0, base_64_1.decode)(data.password), rows[0].password);
             if (!verifyPw) {
                 res = {
                     code: 401,
@@ -48,6 +49,7 @@ const login = async (fastify, data) => {
             code: 200,
             message: "Login successful.",
             token,
+            id: rows[0].id,
         };
     }
     catch (err) {

@@ -220,7 +220,7 @@ export const updateCategory = async (fastify: FastifyInstance, data: any) => {
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
-        let sql = `UPDATE categories SET name='${data.name}', description='${data.description}', mainCategoryId='${data.mainCategoryId || null}' WHERE id=${data.Id}`;
+        let sql = `UPDATE categories SET name='${data.name}', description='${data.description}', mainCategoryId='${data.mainCategoryId || null}' WHERE id=${data.id}`;
         sql = sql.replaceAll("'null'", "null");
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {

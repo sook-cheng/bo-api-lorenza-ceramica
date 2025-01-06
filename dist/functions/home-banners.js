@@ -200,7 +200,7 @@ const deleteHomeBanners = async (fastify, data) => {
     let res = { code: 200, message: "OK." };
     try {
         let args = '';
-        for (const id of data.colors) {
+        for (const id of data.banners) {
             args = args.concat(`${id},`);
         }
         args = args.substring(0, args.length - 1);

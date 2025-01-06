@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import bcrypt from "bcrypt";
+import { decode } from 'base-64';
 import { generateToken } from "./token";
 
 /**
@@ -17,7 +18,7 @@ import { generateToken } from "./token";
  */
 export const login = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res: { code: number, message: string, token?: any } = { code: 200, message: "OK." };
+    let res: { code: number, message: string, token?: any, id?: number } = { code: 200, message: "OK." };
 
     try {
         const [rows] = await connection.query('SELECT * FROM users WHERE username=?', [data.username]);
@@ -30,7 +31,7 @@ export const login = async (fastify: FastifyInstance, data: any) => {
         }
         
         if (rows[0].password) {
-            const verifyPw = await bcrypt.compare(data.password, rows[0].password);
+            const verifyPw = await bcrypt.compare(decode(data.password), rows[0].password);
             if (!verifyPw) {
                 res = {
                     code: 401,
@@ -49,6 +50,7 @@ export const login = async (fastify: FastifyInstance, data: any) => {
             code: 200,
             message: "Login successful.",
             token,
+            id: rows[0].id,
         }
     }
     catch (err) {

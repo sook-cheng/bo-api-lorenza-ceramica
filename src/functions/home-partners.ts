@@ -208,7 +208,7 @@ export const deleteHomePartners = async (fastify: FastifyInstance, data: any) =>
 
     try {
         let args = '';
-        for (const id of data.colors) {
+        for (const id of data.banners) {
             args = args.concat(`${id},`);
         }
 
