@@ -9,7 +9,7 @@ export async function aboutUsRoute(fastify: FastifyInstance) {
     //     }
     // });
 
-    // fastify.addHook('onRequest', async (request, reply) => request.jwtVerify());
+    fastify.addHook('onRequest', async (request, reply) => request.jwtVerify());
 
     fastify.get("/about-us", async (request, reply) => {
         return await getAboutUs(fastify);

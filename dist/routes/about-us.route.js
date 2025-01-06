@@ -9,7 +9,7 @@ async function aboutUsRoute(fastify) {
     //         reply.code(401).send({ message: 'Unauthorized' });
     //     }
     // });
-    // fastify.addHook('onRequest', async (request, reply) => request.jwtVerify());
+    fastify.addHook('onRequest', async (request, reply) => request.jwtVerify());
     fastify.get("/about-us", async (request, reply) => {
         return await (0, functions_1.getAboutUs)(fastify);
     });
