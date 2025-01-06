@@ -199,6 +199,7 @@ exports.createProductsSideNav = createProductsSideNav;
  *  tableName: string
  *  sequence: number
  *  mainSideNavId: number
+ *  subSideNavs: any[]
  * }
  * @returns {
  *  code: number,
@@ -231,8 +232,37 @@ const updateProductsSideNav = async (fastify, data) => {
             //     return;
             // }
             const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?", [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId, data.id]);
+            const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=? ORDER BY sequence', [data.id]);
+            let addSubs = [];
+            let editSubs = [];
+            let deleteSubs = [];
+            if (data.subSideNavs && data.subSideNavs.length > 0 && data.mainSideNavId) {
+                if (subs && subs.length > 0) {
+                    addSubs = data.subSideNavs.filter((x) => !subs.find((y) => y.name === x.name));
+                    editSubs = data.subSideNavs.filter((x) => subs.find((y) => y.name === x.name));
+                    const deletedAry = subs.filter((x) => !data.subSideNavs.find((y) => x.name === y.name));
+                    deleteSubs = deletedAry.length > 0 ? deletedAry.map((x) => x.id) : [];
+                }
+                else {
+                    addSubs = data.subSideNavs;
+                }
+            }
+            else {
+                if (subs && subs.length > 0) {
+                    deleteSubs = subs.map((x) => x.id);
+                }
+            }
+            if (addSubs.length > 0)
+                await (0, exports.addSubProductsSideNavs)(fastify, { mainSideNavId: data.id, subSideNavs: addSubs });
+            if (deleteSubs.length > 0)
+                await (0, exports.deleteSubSideNavs)(fastify, { sideNavs: deleteSubs });
+            if (editSubs.length > 0) {
+                for (const d of editSubs) {
+                    await connection.execute("UPDATE productsSideNavs SET sequence=? WHERE id=?", [d.sequence, d.id]);
+                }
+            }
             res = updated?.insertId ? {
-                code: 201,
+                code: 204,
                 message: "Product Side Navs updated."
             } : {
                 code: 500,
@@ -341,7 +371,7 @@ exports.addSubProductsSideNavs = addSubProductsSideNavs;
  * @param id
  * @returns {
  *  code: number,
-  *  message: string,
+ *  message: string,
  * }
  */
 const deleteSideNav = async (fastify, id) => {
