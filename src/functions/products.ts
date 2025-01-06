@@ -20,7 +20,7 @@ import { FastifyInstance } from "fastify";
  */
 export const addProduct = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res: { code: number, message: string } = { code: 200, message: "OK." };
+    let res: { code: number, message: string, id?: number } = { code: 200, message: "OK." };
     let sizeStr = null;
     let finishStr = null;
 
@@ -73,7 +73,8 @@ export const addProduct = async (fastify: FastifyInstance, data: any) => {
 
         res = result?.insertId ? {
             code: 201,
-            message: `Product created. Created product Id: ${result.insertId}`
+            message: `Product created. Created product Id: ${result.insertId}`,
+            id: result?.insertId,
         } : {
             code: 500,
             message: "Internal Server Error."

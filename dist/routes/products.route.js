@@ -5,7 +5,7 @@ const functions_1 = require("../functions");
 async function productsRoute(fastify) {
     fastify.post("/add-product", async (request, reply) => {
         const result = await (0, functions_1.addProduct)(fastify, request.body);
-        reply.code(result?.code).send({ message: result?.message });
+        reply.code(result?.code).send({ message: result?.message, id: result?.id });
     });
     fastify.get("/all-products", async (request, reply) => {
         return await (0, functions_1.getProducts)(fastify);

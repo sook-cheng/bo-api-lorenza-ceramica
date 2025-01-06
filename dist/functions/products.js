@@ -65,7 +65,8 @@ const addProduct = async (fastify, data) => {
         }
         res = result?.insertId ? {
             code: 201,
-            message: `Product created. Created product Id: ${result.insertId}`
+            message: `Product created. Created product Id: ${result.insertId}`,
+            id: result?.insertId,
         } : {
             code: 500,
             message: "Internal Server Error."

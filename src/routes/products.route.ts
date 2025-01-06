@@ -4,7 +4,7 @@ import { addProduct, assignProductToCategories, assignProductToTags, getProductD
 export async function productsRoute(fastify: FastifyInstance) {
     fastify.post("/add-product", async (request, reply) => {
         const result = await addProduct(fastify, request.body);
-        reply.code(result?.code!).send({ message: result?.message });
+        reply.code(result?.code!).send({ message: result?.message, id: result?.id });
     });
 
     fastify.get("/all-products", async (request, reply) => {
