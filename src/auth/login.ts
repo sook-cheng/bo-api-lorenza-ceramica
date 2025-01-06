@@ -40,7 +40,7 @@ export const login = async (fastify: FastifyInstance, data: any) => {
             }
         }
 
-        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP() isLoggedIn=1 WHERE username=?',[data.username]);
+        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP() isLoggedIn=? WHERE username=?',[1, data.username]);
         const token = generateToken({
             ...rows[0],
             lastLoginDate: Date.now()
@@ -80,7 +80,7 @@ export const logout = async (fastify: FastifyInstance, id: number) => {
     let res: { code: number, message: string, token?: any } = { code: 200, message: "OK." };
 
     try {
-        const [result] = await connection.execute('UPDATE users SET isLoggedIn=0 WHERE id=?',[id]);
+        const [result] = await connection.execute('UPDATE users SET isLoggedIn=? WHERE id=?',[0, id]);
         res = result?.affectedRows > 0 ? {
             code: 200,
             message: "Logout successful.",

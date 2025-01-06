@@ -40,7 +40,7 @@ const login = async (fastify, data) => {
                 };
             }
         }
-        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP() isLoggedIn=1 WHERE username=?', [data.username]);
+        await connection.execute('UPDATE users SET lastLoginDate=CURRENT_TIMESTAMP() isLoggedIn=? WHERE username=?', [1, data.username]);
         const token = (0, token_1.generateToken)({
             ...rows[0],
             lastLoginDate: Date.now()
@@ -78,7 +78,7 @@ const logout = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [result] = await connection.execute('UPDATE users SET isLoggedIn=0 WHERE id=?', [id]);
+        const [result] = await connection.execute('UPDATE users SET isLoggedIn=? WHERE id=?', [0, id]);
         res = result?.affectedRows > 0 ? {
             code: 200,
             message: "Logout successful.",

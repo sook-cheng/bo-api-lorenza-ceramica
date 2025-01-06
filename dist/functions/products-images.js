@@ -34,9 +34,13 @@ const uploadProductsImages = async (fastify, id, images) => {
         let sequence = products[0].sequence ? products[0].sequence : 0;
         for await (const i of images) {
             if (i.type === 'file') {
+                const path = `${image_helper_1.imagesFolder}/products/${products[0].name}`;
                 const type = i.filename.split('.');
                 sequence += 1;
-                (0, promises_1.pipeline)(i.file, node_fs_1.default.createWriteStream(`${image_helper_1.imagesFolder}/products/${products[0].name}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`, { highWaterMark: 10 * 1024 * 1024 }));
+                if (!node_fs_1.default.existsSync(path)) {
+                    node_fs_1.default.mkdirSync(path);
+                }
+                (0, promises_1.pipeline)(i.file, node_fs_1.default.createWriteStream(`${path}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`, { highWaterMark: 10 * 1024 * 1024 }));
                 imgs.push({
                     sequence,
                     type: type[type.length - 1].toLowerCase(),
@@ -98,9 +102,13 @@ const uploadMockedImages = async (fastify, id, images) => {
         let sequence = products[0].sequence ? products[0].sequence : 0;
         for await (const i of images) {
             if (i.type === 'file') {
+                const path = `${image_helper_1.imagesFolder}/products/${products[0].name}`;
                 const type = i.filename.split('.');
                 sequence += 1;
-                (0, promises_1.pipeline)(i.file, node_fs_1.default.createWriteStream(`${image_helper_1.imagesFolder}/products/${products[0].name}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`, { highWaterMark: 10 * 1024 * 1024 }));
+                if (!node_fs_1.default.existsSync(path)) {
+                    node_fs_1.default.mkdirSync(path);
+                }
+                (0, promises_1.pipeline)(i.file, node_fs_1.default.createWriteStream(`${path}/${products[0].code || products[0].color}-${sequence}.${type[type.length - 1].toLowerCase()}`, { highWaterMark: 10 * 1024 * 1024 }));
                 imgs.push({
                     sequence,
                     type: type[type.length - 1].toLowerCase(),
