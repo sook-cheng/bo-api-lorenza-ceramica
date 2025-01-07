@@ -381,10 +381,10 @@ export const removeInspirationThumbnail = async (fastify: FastifyInstance, id: n
  **/
 export const uploadInspirationsImages = async (fastify: FastifyInstance, id: number, images: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res: { code: number, message: string } = { code: 200, message: "OK." };
+    let res: { code: number, message: string, imageUrls?: string[] } = { code: 200, message: "OK." };
 
     try {
-        const imgs: any[] = [];
+        const imgs: string[] = [];
         const [rows] = await connection.query('SELECT id FROM inspirations WHERE id=?', [id]);
 
         if (!rows || rows.length === 0) {
@@ -411,7 +411,8 @@ export const uploadInspirationsImages = async (fastify: FastifyInstance, id: num
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 201,
-            message: `Inspirations images uploaded.`
+            message: `Inspirations images uploaded.`,
+            imageUrls: imgs
         } : {
             code: 500,
             message: "Internal Server Error."

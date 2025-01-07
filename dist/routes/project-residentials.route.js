@@ -42,7 +42,7 @@ async function projectResidentialsRoute(fastify) {
         const { id } = request.params;
         const images = request.files({ limits: { fileSize: 10000000 } });
         const result = await (0, functions_1.uploadProjectResidentialsImages)(fastify, id, images);
-        reply.code(result?.code).send({ message: result?.message });
+        reply.code(result?.code).send({ message: result?.message, imageUrls: result?.imageUrls });
     });
     fastify.get("/project-residentials-images/:id", async (request, reply) => {
         const { id } = request.params;

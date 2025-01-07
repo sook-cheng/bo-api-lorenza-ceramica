@@ -49,7 +49,7 @@ export async function inspirationsRoute(fastify: FastifyInstance) {
         const { id }: any = request.params;
         const images = request.files({ limits: { fileSize: 10000000 } });
         const result = await uploadInspirationsImages(fastify, id, images);
-        reply.code(result?.code!).send({ message: result?.message });
+        reply.code(result?.code!).send({ message: result?.message, imageUrls: result?.imageUrls });
     });
 
     fastify.get("/inspirations-images/:id", async (request, reply) => {

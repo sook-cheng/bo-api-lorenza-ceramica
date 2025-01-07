@@ -377,7 +377,8 @@ const uploadProjectCommercialsImages = async (fastify, id, images) => {
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 201,
-            message: `Project Commercials images uploaded.`
+            message: `Project Commercials images uploaded.`,
+            imageUrls: imgs
         } : {
             code: 500,
             message: "Internal Server Error."

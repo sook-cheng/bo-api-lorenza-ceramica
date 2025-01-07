@@ -381,7 +381,7 @@ export const removeResidentialThumbnail = async (fastify: FastifyInstance, id: n
  **/
 export const uploadProjectResidentialsImages = async (fastify: FastifyInstance, id: number, images: any) => {
     const connection = await fastify['mysql'].getConnection();
-    let res: { code: number, message: string } = { code: 200, message: "OK." };
+    let res: { code: number, message: string, imageUrls?: string[] } = { code: 200, message: "OK." };
 
     try {
         const imgs: any[] = [];
@@ -411,7 +411,8 @@ export const uploadProjectResidentialsImages = async (fastify: FastifyInstance, 
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 201,
-            message: `Project Residentials images uploaded.`
+            message: `Project Residentials images uploaded.`,
+            imageUrls: imgs
         } : {
             code: 500,
             message: "Internal Server Error."

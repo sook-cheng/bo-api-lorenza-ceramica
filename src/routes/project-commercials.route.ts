@@ -49,7 +49,7 @@ export async function projectCommercialsRoute(fastify: FastifyInstance) {
         const { id }: any = request.params;
         const images = request.files({ limits: { fileSize: 10000000 } });
         const result = await uploadProjectCommercialsImages(fastify, id, images);
-        reply.code(result?.code!).send({ message: result?.message });
+        reply.code(result?.code!).send({ message: result?.message, imageUrls: result?.imageUrls });
     });
 
     fastify.get("/project-commercials-images/:id", async (request, reply) => {
