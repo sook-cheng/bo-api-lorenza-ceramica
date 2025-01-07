@@ -12,7 +12,10 @@ const uploadImageFile = (folder, image) => {
 };
 exports.uploadImageFile = uploadImageFile;
 const removeImageFile = (folder, filename) => {
-    node_fs_1.default.unlinkSync(`${exports.imagesFolder}/${folder}/${filename}`);
+    const file = `${exports.imagesFolder}/${folder}/${filename}`;
+    if (node_fs_1.default.existsSync(file)) {
+        node_fs_1.default.unlinkSync(`${exports.imagesFolder}/${folder}/${filename}`);
+    }
 };
 exports.removeImageFile = removeImageFile;
 const formatImageUrl = (folder, filename) => {

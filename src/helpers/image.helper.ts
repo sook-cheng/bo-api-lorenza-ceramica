@@ -8,7 +8,10 @@ export const uploadImageFile = (folder: string, image: any) => {
 }
 
 export const removeImageFile = (folder: string, filename: string) => {
-    fs.unlinkSync(`${imagesFolder}/${folder}/${filename}`)
+    const file = `${imagesFolder}/${folder}/${filename}`;
+    if (fs.existsSync(file)) {
+        fs.unlinkSync(`${imagesFolder}/${folder}/${filename}`)
+    }
 }
 
 export const formatImageUrl = (folder: string, filename: string) => {
