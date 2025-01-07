@@ -196,6 +196,14 @@ export const deleteProjectResidential = async (fastify: FastifyInstance, id: num
             removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
         }
 
+        const [images] = await connection.query('SELECT imageUrl projectResidentialsImages WHERE projectResidentialId=?', [id]);
+
+        for (const i of images) {
+            const oldFile = i.imageUrl.split('/');
+            removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
+        }
+
+        await connection.execute('DELETE FROM projectResidentialsImages WHERE projectResidentialId=?', [id]);
         const [result] = await connection.execute('DELETE FROM projectResidentials WHERE id=?', [id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
@@ -243,10 +251,20 @@ export const deleteProjectResidentials = async (fastify: FastifyInstance, data: 
         const [rows] = await connection.query(`SELECT * FROM projectResidentials WHERE id IN (${args})`);
 
         for (const r of rows) {
-            const oldFile = r.thumbnail.split('/');
+            if (r.thumbnail) {
+                const oldFile = r.thumbnail.split('/');
+                removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
+            }
+        }
+
+        const [images] = await connection.query(`SELECT imageUrl projectResidentialsImages WHERE projectResidentialId IN (${args})`);
+
+        for (const i of images) {
+            const oldFile = i.imageUrl.split('/');
             removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
         }
 
+        await connection.execute(`DELETE FROM projectResidentialsImages WHERE projectResidentialId IN (${args})`);
         const [result] = await connection.execute(`DELETE FROM projectResidentials WHERE id IN (${args})`);
         res = result?.affectedRows > 0 ? {
             code: 204,
@@ -343,8 +361,10 @@ export const removeResidentialThumbnail = async (fastify: FastifyInstance, id: n
             return;
         }
 
-        const oldFile = rows[0].thumbnail.split('/');
-        removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
+        if (rows[0].thumbnail) {
+            const oldFile = rows[0].thumbnail.split('/');
+            removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
+        }
 
         const [result] = await connection.execute('UPDATE projectResidentials SET thumbnail=? WHERE id=?',
             [null, id]);
