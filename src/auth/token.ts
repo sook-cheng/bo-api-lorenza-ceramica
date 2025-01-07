@@ -17,7 +17,7 @@ export const generateToken = (user: any, fastify: FastifyInstance) => {
         subject: user.username,
         audience: 'lorenzaceramica.com',
         algorithm: 'RS256',
-        expiresIn: '1h',
+        expiresIn: '8h',
     };
 
     // Access token
