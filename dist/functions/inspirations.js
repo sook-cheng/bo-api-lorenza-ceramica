@@ -180,7 +180,7 @@ const deleteInspiration = async (fastify, id) => {
             const oldFile = rows[0].thumbnail.split('/');
             (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
         }
-        const [images] = await connection.query('SELECT imageUrl inspirationsImages WHERE inspirationId=?', [id]);
+        const [images] = await connection.query('SELECT imageUrl FROM inspirationsImages WHERE inspirationId=?', [id]);
         for (const i of images) {
             const oldFile = i.imageUrl.split('/');
             (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
@@ -235,7 +235,7 @@ const deleteInspirations = async (fastify, data) => {
                 (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);
             }
         }
-        const [images] = await connection.query(`SELECT imageUrl inspirationsImages WHERE inspirationId IN (${args})`);
+        const [images] = await connection.query(`SELECT imageUrl FROM inspirationsImages WHERE inspirationId IN (${args})`);
         for (const i of images) {
             const oldFile = i.imageUrl.split('/');
             (0, helpers_1.removeImageFile)('inspirations', oldFile[oldFile.length - 1]);

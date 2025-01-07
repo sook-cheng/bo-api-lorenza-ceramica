@@ -196,7 +196,7 @@ export const deleteProjectResidential = async (fastify: FastifyInstance, id: num
             removeImageFile('projects/residentials', oldFile[oldFile.length - 1]);
         }
 
-        const [images] = await connection.query('SELECT imageUrl projectResidentialsImages WHERE projectResidentialId=?', [id]);
+        const [images] = await connection.query('SELECT imageUrl FROM projectResidentialsImages WHERE projectResidentialId=?', [id]);
 
         for (const i of images) {
             const oldFile = i.imageUrl.split('/');
@@ -257,7 +257,7 @@ export const deleteProjectResidentials = async (fastify: FastifyInstance, data: 
             }
         }
 
-        const [images] = await connection.query(`SELECT imageUrl projectResidentialsImages WHERE projectResidentialId IN (${args})`);
+        const [images] = await connection.query(`SELECT imageUrl FROM projectResidentialsImages WHERE projectResidentialId IN (${args})`);
 
         for (const i of images) {
             const oldFile = i.imageUrl.split('/');

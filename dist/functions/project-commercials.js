@@ -180,7 +180,7 @@ const deleteProjectCommercial = async (fastify, id) => {
             const oldFile = rows[0].thumbnail.split('/');
             (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
         }
-        const [images] = await connection.query('SELECT imageUrl projectCommercialsImages WHERE projectCommercialId=?', [id]);
+        const [images] = await connection.query('SELECT imageUrl FROM projectCommercialsImages WHERE projectCommercialId=?', [id]);
         for (const i of images) {
             const oldFile = i.imageUrl.split('/');
             (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
@@ -235,7 +235,7 @@ const deleteProjectCommercials = async (fastify, data) => {
                 (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
             }
         }
-        const [images] = await connection.query(`SELECT imageUrl projectCommercialsImages WHERE projectCommercialId IN (${args})`);
+        const [images] = await connection.query(`SELECT imageUrl FROM projectCommercialsImages WHERE projectCommercialId IN (${args})`);
         for (const i of images) {
             const oldFile = i.imageUrl.split('/');
             (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
