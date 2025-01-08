@@ -134,7 +134,7 @@ export const getProductsSideNavsDetailsById = async (fastify: FastifyInstance, i
  * @param fastify 
  * @param data {
  *  name: string
- *  path: string
+ *  path?: string
  *  tableName: string
  *  sequence: number
  *  mainSideNavId: number
@@ -169,7 +169,7 @@ export const createProductsSideNav = async (fastify: FastifyInstance, data: any)
         // }
 
         const [result] = await connection.execute('INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES (?,?,?,?,?)',
-            [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null]);
+            [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null]);
 
         if (data.subSideNavs && data.subSideNavs.length > 0 && result?.insertId) {
             await addSubProductsSideNavs(fastify, {
@@ -205,7 +205,7 @@ export const createProductsSideNav = async (fastify: FastifyInstance, data: any)
  * @param data {
  *  id: number
  *  name: string
- *  path: string
+ *  path?: string
  *  tableName: string
  *  sequence: number
  *  mainSideNavId: number
@@ -248,7 +248,7 @@ export const updateProductsSideNav = async (fastify: FastifyInstance, data: any)
             // }
 
             const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?",
-                [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
+                [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
 
             const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=? ORDER BY sequence', [data.id]);
             let addSubs: any[] = [];
@@ -327,12 +327,14 @@ export const addSubProductsSideNavs = async (fastify: FastifyInstance, data: any
 
     try {
         const [rows] = await connection.query('SELECT * FROM productsSideNavs;');
+        const mainSideNav = rows.find((x: any) => x.id === data.mainSideNavId);
 
         const subSideNavs = data.subSideNavs && data.subSideNavs.length > 0
             ? data.subSideNavs.map((y: any) => {
+                const path = y.path || `${mainSideNav.path}/${y.name.replaceAll(' ', '-').toLowerCase()}`;
                 return {
                     name: y.name,
-                    path: y.path,
+                    path,
                     tableName: y.tableName,
                     sequence: y.sequence,
                 }

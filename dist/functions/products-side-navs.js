@@ -130,7 +130,7 @@ exports.getProductsSideNavsDetailsById = getProductsSideNavsDetailsById;
  * @param fastify
  * @param data {
  *  name: string
- *  path: string
+ *  path?: string
  *  tableName: string
  *  sequence: number
  *  mainSideNavId: number
@@ -161,7 +161,7 @@ const createProductsSideNav = async (fastify, data) => {
         //     };
         //     return;
         // }
-        const [result] = await connection.execute('INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES (?,?,?,?,?)', [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null]);
+        const [result] = await connection.execute('INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES (?,?,?,?,?)', [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null]);
         if (data.subSideNavs && data.subSideNavs.length > 0 && result?.insertId) {
             await (0, exports.addSubProductsSideNavs)(fastify, {
                 mainSideNavId: result?.insertId,
@@ -195,7 +195,7 @@ exports.createProductsSideNav = createProductsSideNav;
  * @param data {
  *  id: number
  *  name: string
- *  path: string
+ *  path?: string
  *  tableName: string
  *  sequence: number
  *  mainSideNavId: number
@@ -231,7 +231,7 @@ const updateProductsSideNav = async (fastify, data) => {
             //     };
             //     return;
             // }
-            const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?", [data.name, data.path, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
+            const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?", [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
             const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=? ORDER BY sequence', [data.id]);
             let addSubs = [];
             let editSubs = [];
@@ -306,11 +306,13 @@ const addSubProductsSideNavs = async (fastify, data) => {
     let res = { code: 200, message: "OK." };
     try {
         const [rows] = await connection.query('SELECT * FROM productsSideNavs;');
+        const mainSideNav = rows.find((x) => x.id === data.mainSideNavId);
         const subSideNavs = data.subSideNavs && data.subSideNavs.length > 0
             ? data.subSideNavs.map((y) => {
+                const path = y.path || `${mainSideNav.path}/${y.name.replaceAll(' ', '-').toLowerCase()}`;
                 return {
                     name: y.name,
-                    path: y.path,
+                    path,
                     tableName: y.tableName,
                     sequence: y.sequence,
                 };
