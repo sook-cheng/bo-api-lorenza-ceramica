@@ -20,7 +20,7 @@ export const getAllProjectResidentials = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query("SELECT * FROM projectResidentials ORDER BY id");
+        const [rows] = await connection.query("SELECT * FROM projectResidentials ORDER BY updatedAt DESC");
 
         value = rows;
     } finally {

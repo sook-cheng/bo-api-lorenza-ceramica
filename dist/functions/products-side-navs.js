@@ -19,7 +19,7 @@ const getMainProductsSideNavs = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId IS NULL ORDER BY sequence;');
+        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId IS NULL ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {
@@ -46,7 +46,7 @@ const getSubProductsSideNavsByMainId = async (fastify, mainSideNavId) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows, fields] = await connection.query(`SELECT * FROM productsSideNavs WHERE mainSideNavId = ${mainSideNavId} ORDER BY sequence;`);
+        const [rows, fields] = await connection.query(`SELECT * FROM productsSideNavs WHERE mainSideNavId = ${mainSideNavId} ORDER BY updatedAt DESC;`);
         value = rows;
     }
     finally {
@@ -74,7 +74,7 @@ const getAllProductsSideNavs = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs ORDER BY mainSideNavId, sequence;');
+        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs ORDER BY updatedAt DESC;');
         const mainSideNavs = rows.filter((x) => !x.mainSideNavId);
         value = mainSideNavs.map((x) => {
             return {
@@ -232,7 +232,7 @@ const updateProductsSideNav = async (fastify, data) => {
             //     return;
             // }
             const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?", [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
-            const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=? ORDER BY sequence', [data.id]);
+            const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=?', [data.id]);
             let addSubs = [];
             let editSubs = [];
             let deleteSubs = [];

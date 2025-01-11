@@ -17,8 +17,8 @@ const getAllSections = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM faqSections ORDER BY sequence');
-        const [qRows] = await connection.query('SELECT * FROM faqQuestions ORDER BY sectionId, sequence');
+        const [rows] = await connection.query('SELECT * FROM faqSections ORDER BY updatedAt DESC');
+        const [qRows] = await connection.query('SELECT * FROM faqQuestions ORDER BY updatedAt DESC');
         value = rows.map((x) => {
             return {
                 ...x,
@@ -50,7 +50,7 @@ const getAllQuestions = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT fq.*, fs.name AS sectionName FROM faqQuestions fq join faqSections fs ON fq.sectionId = fs.id ORDER BY sectionId, sequence');
+        const [rows] = await connection.query('SELECT fq.*, fs.name AS sectionName FROM faqQuestions fq join faqSections fs ON fq.sectionId = fs.id ORDER BY updatedAt DESC');
         value = rows;
     }
     finally {

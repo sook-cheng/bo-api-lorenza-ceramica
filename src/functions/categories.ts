@@ -18,7 +18,7 @@ export const getAllCategories = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM categories ORDER BY mainCategoryId, id;');
+        const [rows] = await connection.query('SELECT * FROM categories ORDER BY updatedAt DESC;');
         const mainCategories: any[] = rows.filter((x: any) => !x.mainCategoryId);
         value = mainCategories.map((x: any) => {
             return {
@@ -77,7 +77,7 @@ export const getAllCategoriesNoLevel = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT c1.*, c2.name AS mainCategoryName FROM categories c1 LEFT JOIN categories c2 ON c1.mainCategoryId = c2.id ORDER BY c1.mainCategoryId, c1.id;');
+        const [rows] = await connection.query('SELECT c1.*, c2.name AS mainCategoryName FROM categories c1 LEFT JOIN categories c2 ON c1.mainCategoryId = c2.id ORDER BY c1.updatedAt DESC;');
         value = rows;
     }
     finally {

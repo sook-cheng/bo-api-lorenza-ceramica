@@ -20,7 +20,7 @@ const getAllProjectResidentials = async (fastify) => {
     const connection = await fastify["mysql"].getConnection();
     let value;
     try {
-        const [rows] = await connection.query("SELECT * FROM projectResidentials ORDER BY id");
+        const [rows] = await connection.query("SELECT * FROM projectResidentials ORDER BY updatedAt DESC");
         value = rows;
     }
     finally {

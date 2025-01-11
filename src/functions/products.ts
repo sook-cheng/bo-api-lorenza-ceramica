@@ -575,7 +575,7 @@ export const getProducts = async (fastify: FastifyInstance) => {
     let value: any = [];
 
     try {
-        const [rows] = await connection.execute('SELECT DISTINCT * FROM products;');
+        const [rows] = await connection.execute('SELECT DISTINCT * FROM products ORDER BY updatedAt DESC;');
 
         if (rows.length > 0) {
             const productIds: number[] = rows.map((x: any) => x.id);

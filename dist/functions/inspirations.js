@@ -20,7 +20,7 @@ const getAllInspirations = async (fastify) => {
     const connection = await fastify["mysql"].getConnection();
     let value;
     try {
-        const [rows] = await connection.query("SELECT * FROM inspirations ORDER BY id");
+        const [rows] = await connection.query("SELECT * FROM inspirations ORDER BY updatedAt DESC");
         value = rows;
     }
     finally {

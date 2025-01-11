@@ -19,7 +19,7 @@ export const getMainProductsSideNavs = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId IS NULL ORDER BY sequence;');
+        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId IS NULL ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {
@@ -47,7 +47,7 @@ export const getSubProductsSideNavsByMainId = async (fastify: FastifyInstance, m
     let value: any;
 
     try {
-        const [rows, fields] = await connection.query(`SELECT * FROM productsSideNavs WHERE mainSideNavId = ${mainSideNavId} ORDER BY sequence;`);
+        const [rows, fields] = await connection.query(`SELECT * FROM productsSideNavs WHERE mainSideNavId = ${mainSideNavId} ORDER BY updatedAt DESC;`);
         value = rows;
     }
     finally {
@@ -76,7 +76,7 @@ export const getAllProductsSideNavs = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs ORDER BY mainSideNavId, sequence;');
+        const [rows, fields] = await connection.query('SELECT * FROM productsSideNavs ORDER BY updatedAt DESC;');
         const mainSideNavs: any[] = rows.filter((x: any) => !x.mainSideNavId);
         value = mainSideNavs.map((x: any) => {
             return {
@@ -250,7 +250,7 @@ export const updateProductsSideNav = async (fastify: FastifyInstance, data: any)
             const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?",
                 [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
 
-            const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=? ORDER BY sequence', [data.id]);
+            const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=?', [data.id]);
             let addSubs: any[] = [];
             let editSubs: any[] = [];
             let deleteSubs: any[] = [];
