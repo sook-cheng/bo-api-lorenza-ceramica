@@ -16,7 +16,7 @@ export const getAllFinishes = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM finishes;');
+        const [rows] = await connection.query('SELECT * FROM finishes ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

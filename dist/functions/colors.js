@@ -16,7 +16,7 @@ const getAllColors = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM colors;');
+        const [rows] = await connection.query('SELECT * FROM colors ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

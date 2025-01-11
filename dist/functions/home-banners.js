@@ -19,7 +19,7 @@ const getAllHomeBanners = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM homeBanners;');
+        const [rows] = await connection.query('SELECT * FROM homeBanners ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

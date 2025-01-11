@@ -18,7 +18,7 @@ const getAllHomePartners = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM homePartners;');
+        const [rows] = await connection.query('SELECT * FROM homePartners ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

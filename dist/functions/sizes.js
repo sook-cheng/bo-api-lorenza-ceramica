@@ -16,7 +16,7 @@ const getAllSizes = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM sizes;');
+        const [rows] = await connection.query('SELECT * FROM sizes ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

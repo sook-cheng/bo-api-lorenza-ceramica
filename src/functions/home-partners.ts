@@ -18,7 +18,7 @@ export const getAllHomePartners = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM homePartners;');
+        const [rows] = await connection.query('SELECT * FROM homePartners ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

@@ -19,7 +19,7 @@ export const getAllHomeBanners = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM homeBanners;');
+        const [rows] = await connection.query('SELECT * FROM homeBanners ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

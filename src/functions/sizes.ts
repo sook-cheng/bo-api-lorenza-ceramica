@@ -16,7 +16,7 @@ export const getAllSizes = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM sizes;');
+        const [rows] = await connection.query('SELECT * FROM sizes ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {

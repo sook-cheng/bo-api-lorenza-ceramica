@@ -16,7 +16,7 @@ export const getAllColors = async (fastify: FastifyInstance) => {
     let value: any;
 
     try {
-        const [rows] = await connection.query('SELECT * FROM colors;');
+        const [rows] = await connection.query('SELECT * FROM colors ORDER BY updatedAt DESC;');
         value = rows;
     }
     finally {
