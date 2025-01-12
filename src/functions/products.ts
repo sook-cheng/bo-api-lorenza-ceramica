@@ -12,6 +12,8 @@ import { FastifyInstance } from "fastify";
  *  size?: number
  *  finish?: number
  *  thickness?: string
+ *  tags: number[]
+ *  categories: number[]
  * }
  * @returns {
  *  code: number,
@@ -69,6 +71,16 @@ export const addProduct = async (fastify: FastifyInstance, data: any) => {
 
         if (data.finish) {
             await connection.execute('INSERT INTO productsFinishes (productId,finishId) VALUES (?,?)', [result.insertId, data.finish]);
+        }
+
+        // Assign categories
+        if (data.categories && data.categories.length > 0) {
+            await assignProductToCategories(fastify, { productId: result.insertId, categories: data.categories });
+        }
+
+        // Assign tags
+        if (data.tags && data.tags.length > 0) {
+            await assignProductToTags(fastify, { productId: result.insertId, tags: data.tags });
         }
 
         res = result?.insertId ? {
@@ -409,7 +421,6 @@ export const updateProduct = async (fastify: FastifyInstance, data: any) => {
 
                 if (addTags.length > 0) await assignProductToTags(fastify, { productId: rows[0].id, tags: addTags });
                 if (deleteTags.length > 0) await removeTagsForProduct(fastify, { productId: rows[0].id, tags: deleteTags });
-
             }
         }
 
@@ -556,6 +567,8 @@ export const removeProducts = async (fastify: FastifyInstance, data: any) => {
  *  size?: string
  *  finish?: string
  *  thickness?: string
+ *  createdAt: Date
+ *  updatedAt: Date
  *  images: string[]
  *  mockedImages: string[]
  *  categories: { 
@@ -609,6 +622,8 @@ export const getProducts = async (fastify: FastifyInstance) => {
                     color: x.color ?? '-',
                     finish: x.finish ?? '-',
                     thickness: x.thickness ?? '-',
+                    createdAt: x.createdAt ?? '-',
+                    updatedAt: x.updatedAt ?? '-',
                     images: imgList,
                     mockedImages: mockedImgList,
                     categories: categoryList,
@@ -651,7 +666,7 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
     let value: any;
 
     try {
-        const [rows] = await connection.query(`SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish WHERE p.id =?;`, [id]);
+        const [rows] = await connection.query(`SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish, p.createdAt, p.updatedAt FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish WHERE p.id =?;`, [id]);
 
         const [images] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 0;`, [id]);
         const [mockedImages] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 1;`, [id]);
@@ -673,6 +688,8 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
             color: rows[0].color ?? '-',
             finish: rows[0].finish ?? '-',
             thickness: rows[0].thickness ?? '-',
+            createdAt: rows[0].createdAt ?? '-',
+            updatedAt: rows[0].updatedAt ?? '-',
             images: imgList,
             mockedImages: mockedImgList,
             categories: categoryList,
