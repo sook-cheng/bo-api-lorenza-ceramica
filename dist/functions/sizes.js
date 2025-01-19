@@ -138,6 +138,7 @@ const createSizes = async (fastify, data) => {
             sql += `('${c.name}','${c.value}),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
@@ -177,7 +178,7 @@ const updateSize = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
-        const [result] = await connection.execute('UPDATE sizes SET name=?, value=? WHERE id=?', [data.name, data.value, data.id]);
+        const [result] = await connection.execute('UPDATE sizes SET name=?, value=? WHERE id=?', [data.name || null, data.value || null, data.id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
             message: `Size updated.`

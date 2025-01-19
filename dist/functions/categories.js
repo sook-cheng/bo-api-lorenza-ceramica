@@ -164,6 +164,7 @@ const createCategory = async (fastify, data) => {
                 sql += `('${category.name}','${category.description}',${result?.insertId}),`;
             }
             sql = sql.replaceAll("'null'", "null");
+            sql = sql.replaceAll("'undefined'", "null");
             sql = sql.substring(0, sql.length - 1);
             // Create sub-categories
             await connection.execute(sql);
@@ -209,6 +210,7 @@ const updateCategory = async (fastify, data) => {
     try {
         let sql = `UPDATE categories SET name='${data.name}', description='${data.description}', mainCategoryId='${data.mainCategoryId || null}' WHERE id=${data.id}`;
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 204,
@@ -269,6 +271,7 @@ const addSubCategories = async (fastify, data) => {
             sql += `('${category.name}','${category.description}',${data.mainCategoryId}),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
         // Create sub-categories
         const [result] = await connection.execute(sql);

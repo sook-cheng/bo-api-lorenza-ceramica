@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProjectResidentialsImagesById = exports.uploadProjectResidentialsImages = exports.removeResidentialThumbnail = exports.uploadResidentialThumbnail = exports.deleteProjectResidentials = exports.deleteProjectResidential = exports.updateProjectResidential = exports.createProjectResidential = exports.getProjectResidentialDetailsById = exports.getAllProjectResidentials = void 0;
+exports.getProjectResidentialsImagesById = exports.updateProjectResidentialsImages = exports.uploadProjectResidentialsImages = exports.removeResidentialThumbnail = exports.uploadResidentialThumbnail = exports.deleteProjectResidentials = exports.deleteProjectResidential = exports.updateProjectResidential = exports.createProjectResidential = exports.getProjectResidentialDetailsById = exports.getAllProjectResidentials = void 0;
 const helpers_1 = require("../helpers");
 /**
  *
@@ -65,6 +65,7 @@ exports.getProjectResidentialDetailsById = getProjectResidentialDetailsById;
  *  description: string
  *  content: string
  *  path: string
+ *  imageUrls: string[]
  * }
  * @returns {
  *  code: number,
@@ -84,6 +85,16 @@ const createProjectResidential = async (fastify, data) => {
             return;
         }
         const [result] = await connection.execute('INSERT INTO projectResidentials (title,description,content,path) VALUES (?,?,?,?)', [data.title, data.description, data.content, data.path]);
+        if (data.imageUrls && data.imageUrls.length > 0) {
+            let sql = "INSERT INTO projectResidentialsImages (projectResidentialId, imageUrl) VALUES ";
+            for (const i of data.imageUrls) {
+                sql += `(${result?.insertId},'${i}'),`;
+            }
+            sql = sql.replaceAll("'null'", "null");
+            sql = sql.replaceAll("'undefined'", "null");
+            sql = sql.substring(0, sql.length - 1);
+            await connection.execute(sql);
+        }
         res = result?.insertId ? {
             code: 201,
             message: `Project Residential created. Created project Residential Id: ${result.insertId}`,
@@ -115,6 +126,7 @@ exports.createProjectResidential = createProjectResidential;
  *  description: string
  *  content: string
  *  path: string
+ *  imageUrls: string[]
  * }
  * @returns {
  *  code: number,
@@ -133,7 +145,32 @@ const updateProjectResidential = async (fastify, data) => {
             };
             return;
         }
-        const [result] = await connection.execute('UPDATE projectResidentials SET title=?, description=?, content=?, path=? WHERE id=?', [data.title, data.description, data.content, data.path, data.id]);
+        const [result] = await connection.execute('UPDATE projectResidentials SET title=?, description=?, content=?, path=? WHERE id=?', [data.title || null, data.description || null, data.content || null, data.path || null, data.id]);
+        if (data.imageUrls && data.imageUrls.length > 0) {
+            const [images] = await connection.query('SELECT imageUrl FROM projectResidentialsImages WHERE projectResidentialId=?', [data.id]);
+            const addedUrls = data.imageUrls.filter((x) => !images.find((y) => y.imageUrl === x));
+            const removeUrls = images.filter((x) => !data.imageUrls.find((y) => x.imageUrl === y));
+            if (addedUrls.length > 0) {
+                let sql = "INSERT INTO projectResidentialsImages (projectResidentialId, imageUrl) VALUES ";
+                for (const i of addedUrls) {
+                    sql += `(${result?.insertId},'${i}'),`;
+                }
+                sql = sql.replaceAll("'null'", "null");
+                sql = sql.replaceAll("'undefined'", "null");
+                sql = sql.substring(0, sql.length - 1);
+                await connection.execute(sql);
+            }
+            if (removeUrls.length > 0) {
+                let args = '';
+                for (const i of removeUrls) {
+                    args = args.concat(`${i.imageUrl},`);
+                    const oldFile = i.imageUrl.split('/');
+                    (0, helpers_1.removeImageFile)('projects/residentials', oldFile[oldFile.length - 1]);
+                }
+                args = args.substring(0, args.length - 1);
+                await connection.execute(`DELETE FROM projectResidentialsImages WHERE imageUrl IN (${args})`);
+            }
+        }
         res = result?.affectedRows ? {
             code: 204,
             message: `Project Residential updated.`
@@ -272,7 +309,7 @@ exports.deleteProjectResidentials = deleteProjectResidentials;
  *  code: number,
  *  message: string,
  * }
- **/
+ */
 const uploadResidentialThumbnail = async (fastify, id, image) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
@@ -358,19 +395,60 @@ exports.removeResidentialThumbnail = removeResidentialThumbnail;
 /**
  *
  * @param fastify
- * @param id
  * @param images (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
  *  code: number,
  *  message: string,
  * }
  **/
-const uploadProjectResidentialsImages = async (fastify, id, images) => {
+const uploadProjectResidentialsImages = async (fastify, images) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
         const imgs = [];
-        const [rows] = await connection.query('SELECT id FROM projectResidentials WHERE id=?', [id]);
+        for await (const i of images) {
+            if (i.type === 'file') {
+                (0, helpers_1.uploadImageFile)('projects/residentials', i);
+                imgs.push((0, helpers_1.formatImageUrl)('projects/residentials', i.filename));
+            }
+        }
+        res = {
+            code: 201,
+            message: `Project Residentials images uploaded.`,
+            imageUrls: imgs
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+};
+exports.uploadProjectResidentialsImages = uploadProjectResidentialsImages;
+/**
+ *
+ * @param fastify
+ * @param data {
+ *  id: string
+ *  urls: string[]
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ */
+const updateProjectResidentialsImages = async (fastify, data) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res = { code: 200, message: "OK." };
+    try {
+        const imgs = [];
+        const [rows] = await connection.query('SELECT id FROM projectResidentials WHERE id=?', [data.id]);
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
@@ -378,23 +456,17 @@ const uploadProjectResidentialsImages = async (fastify, id, images) => {
             };
             return;
         }
-        for await (const i of images) {
-            if (i.type === 'file') {
-                (0, helpers_1.uploadImageFile)('projects/residentials', i);
-                imgs.push((0, helpers_1.formatImageUrl)('projects/residentials', i.filename));
-            }
-        }
         let sql = "INSERT INTO projectResidentialsImages (projectResidentialId, imageUrl) VALUES ";
-        for (const i of imgs) {
-            sql += `(${id},'${i}'),`;
+        for (const i of data.urls) {
+            sql += `(${data.id},'${i}'),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
-            code: 201,
-            message: `Project Residentials images uploaded.`,
-            imageUrls: imgs
+            code: 204,
+            message: `Project Residentials images updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -412,7 +484,7 @@ const uploadProjectResidentialsImages = async (fastify, id, images) => {
         return res;
     }
 };
-exports.uploadProjectResidentialsImages = uploadProjectResidentialsImages;
+exports.updateProjectResidentialsImages = updateProjectResidentialsImages;
 /**
  *
  * @param fastify

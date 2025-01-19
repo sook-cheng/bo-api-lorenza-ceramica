@@ -38,11 +38,14 @@ async function projectResidentialsRoute(fastify) {
         const result = await (0, functions_1.removeResidentialThumbnail)(fastify, id);
         reply.code(result?.code).send({ message: result?.message });
     });
-    fastify.post("/upload-project-residentials-images/:id", async (request, reply) => {
-        const { id } = request.params;
+    fastify.post("/upload-project-residentials-images", async (request, reply) => {
         const images = request.files({ limits: { fileSize: 10000000 } });
-        const result = await (0, functions_1.uploadProjectResidentialsImages)(fastify, id, images);
+        const result = await (0, functions_1.uploadProjectResidentialsImages)(fastify, images);
         reply.code(result?.code).send({ message: result?.message, imageUrls: result?.imageUrls });
+    });
+    fastify.post("/update-project-residentials-images", async (request, reply) => {
+        const result = await (0, functions_1.updateProjectResidentialsImages)(fastify, request.body);
+        reply.code(result?.code).send({ message: result?.message });
     });
     fastify.get("/project-residentials-images/:id", async (request, reply) => {
         const { id } = request.params;

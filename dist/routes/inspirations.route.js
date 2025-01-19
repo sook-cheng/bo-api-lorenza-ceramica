@@ -38,11 +38,14 @@ async function inspirationsRoute(fastify) {
         const result = await (0, functions_1.removeInspirationThumbnail)(fastify, id);
         reply.code(result?.code).send({ message: result?.message });
     });
-    fastify.post("/upload-inspirations-images/:id", async (request, reply) => {
-        const { id } = request.params;
+    fastify.post("/upload-inspirations-images", async (request, reply) => {
         const images = request.files({ limits: { fileSize: 10000000 } });
-        const result = await (0, functions_1.uploadInspirationsImages)(fastify, id, images);
+        const result = await (0, functions_1.uploadInspirationsImages)(fastify, images);
         reply.code(result?.code).send({ message: result?.message, imageUrls: result?.imageUrls });
+    });
+    fastify.post("/update-inspirations-images", async (request, reply) => {
+        const result = await (0, functions_1.updateInspirationsImages)(fastify, request.body);
+        reply.code(result?.code).send({ message: result?.message });
     });
     fastify.get("/inspirations-images/:id", async (request, reply) => {
         const { id } = request.params;

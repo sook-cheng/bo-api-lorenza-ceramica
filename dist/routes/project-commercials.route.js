@@ -38,11 +38,14 @@ async function projectCommercialsRoute(fastify) {
         const result = await (0, functions_1.removeCommercialThumbnail)(fastify, id);
         reply.code(result?.code).send({ message: result?.message });
     });
-    fastify.post("/upload-project-commercials-images/:id", async (request, reply) => {
-        const { id } = request.params;
+    fastify.post("/upload-project-commercials-images", async (request, reply) => {
         const images = request.files({ limits: { fileSize: 10000000 } });
-        const result = await (0, functions_1.uploadProjectCommercialsImages)(fastify, id, images);
+        const result = await (0, functions_1.uploadProjectCommercialsImages)(fastify, images);
         reply.code(result?.code).send({ message: result?.message, imageUrls: result?.imageUrls });
+    });
+    fastify.post("/update-project-commercials-images", async (request, reply) => {
+        const result = await (0, functions_1.updateProjectCommercialsImages)(fastify, request.body);
+        reply.code(result?.code).send({ message: result?.message });
     });
     fastify.get("/project-commercials-images/:id", async (request, reply) => {
         const { id } = request.params;

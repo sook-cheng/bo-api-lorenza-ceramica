@@ -1,5 +1,5 @@
 {
-  "name": "api-lorenza-ceramica",
+  "name": "bo-api-lorenza-ceramica",
   "version": "1.0.0",
   "description": "This project was bootstrapped with Fastify-CLI.",
   "main": "app.js",

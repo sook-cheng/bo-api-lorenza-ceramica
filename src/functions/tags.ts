@@ -175,6 +175,7 @@ export const createTag = async (fastify: FastifyInstance, data: any) => {
 
             }
             sql = sql.replaceAll("'null'", "null");
+            sql = sql.replaceAll("'undefined'", "null");
             sql = sql.substring(0, sql.length - 1);
 
             // Create sub-tags
@@ -223,6 +224,7 @@ export const updateTag = async (fastify: FastifyInstance, data: any) => {
     try {
         let sql = `UPDATE tags SET name='${data.name}', value='${data.description}', mainTagId='${data.mainTagId || null}' WHERE id=${data.id}`;
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
             code: 204,
@@ -287,6 +289,7 @@ export const addSubTags = async (fastify: FastifyInstance, data: any) => {
             sql += `('${tag.name}','${tag.value}',${data.mainTagId}),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
 
         // Create sub-tags

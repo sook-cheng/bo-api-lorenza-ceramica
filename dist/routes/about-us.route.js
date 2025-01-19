@@ -17,5 +17,11 @@ async function aboutUsRoute(fastify) {
         const result = await (0, functions_1.updateAboutUs)(fastify, request.body);
         reply.code(result?.code).send({ message: result?.message });
     });
+    fastify.post("/modify-about-us-image/:id", async (request, reply) => {
+        const { id } = request.params;
+        const image = await request.file({ limits: { fileSize: 10000000 } });
+        const result = await (0, functions_1.modifyAboutUsImage)(fastify, id, image);
+        reply.code(result?.code).send({ message: result?.message });
+    });
 }
 //# sourceMappingURL=about-us.route.js.map

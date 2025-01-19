@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProjectCommercialsImagesById = exports.uploadProjectCommercialsImages = exports.removeCommercialThumbnail = exports.uploadCommercialThumbnail = exports.deleteProjectCommercials = exports.deleteProjectCommercial = exports.updateProjectCommercial = exports.createProjectCommercial = exports.getProjectCommercialDetailsById = exports.getAllProjectCommercials = void 0;
+exports.getProjectCommercialsImagesById = exports.updateProjectCommercialsImages = exports.uploadProjectCommercialsImages = exports.removeCommercialThumbnail = exports.uploadCommercialThumbnail = exports.deleteProjectCommercials = exports.deleteProjectCommercial = exports.updateProjectCommercial = exports.createProjectCommercial = exports.getProjectCommercialDetailsById = exports.getAllProjectCommercials = void 0;
 const helpers_1 = require("../helpers");
 /**
  *
@@ -65,6 +65,7 @@ exports.getProjectCommercialDetailsById = getProjectCommercialDetailsById;
  *  description: string
  *  content: string
  *  path: string
+ *  imageUrls: string[]
  * }
  * @returns {
  *  code: number,
@@ -84,6 +85,16 @@ const createProjectCommercial = async (fastify, data) => {
             return;
         }
         const [result] = await connection.execute('INSERT INTO projectCommercials (title,description,content,path) VALUES (?,?,?,?)', [data.title, data.description, data.content, data.path]);
+        if (data.imageUrls && data.imageUrls.length > 0) {
+            let sql = "INSERT INTO projectCommercialsImages (projectCommercialId, imageUrl) VALUES ";
+            for (const i of data.imageUrls) {
+                sql += `(${result?.insertId},'${i}'),`;
+            }
+            sql = sql.replaceAll("'null'", "null");
+            sql = sql.replaceAll("'undefined'", "null");
+            sql = sql.substring(0, sql.length - 1);
+            await connection.execute(sql);
+        }
         res = result?.insertId ? {
             code: 201,
             message: `Project Commercial created. Created project Commercial Id: ${result.insertId}`,
@@ -115,6 +126,7 @@ exports.createProjectCommercial = createProjectCommercial;
  *  description: string
  *  content: string
  *  path: string
+ *  imageUrls: string[]
  * }
  * @returns {
  *  code: number,
@@ -133,7 +145,32 @@ const updateProjectCommercial = async (fastify, data) => {
             };
             return;
         }
-        const [result] = await connection.execute('UPDATE projectCommercials SET title=?, description=?, content=?, path=? WHERE id=?', [data.title, data.description, data.content, data.path, data.id]);
+        const [result] = await connection.execute('UPDATE projectCommercials SET title=?, description=?, content=?, path=? WHERE id=?', [data.title || null, data.description || null, data.content || null, data.path || null, data.id]);
+        if (data.imageUrls && data.imageUrls.length > 0) {
+            const [images] = await connection.query('SELECT imageUrl FROM projectCommercialsImages WHERE projectCommercialId=?', [data.id]);
+            const addedUrls = data.imageUrls.filter((x) => !images.find((y) => y.imageUrl === x));
+            const removeUrls = images.filter((x) => !data.imageUrls.find((y) => x.imageUrl === y));
+            if (addedUrls.length > 0) {
+                let sql = "INSERT INTO projectCommercialsImages (projectCommercialId, imageUrl) VALUES ";
+                for (const i of addedUrls) {
+                    sql += `(${result?.insertId},'${i}'),`;
+                }
+                sql = sql.replaceAll("'null'", "null");
+                sql = sql.replaceAll("'undefined'", "null");
+                sql = sql.substring(0, sql.length - 1);
+                await connection.execute(sql);
+            }
+            if (removeUrls.length > 0) {
+                let args = '';
+                for (const i of removeUrls) {
+                    args = args.concat(`${i.imageUrl},`);
+                    const oldFile = i.imageUrl.split('/');
+                    (0, helpers_1.removeImageFile)('projects/commercials', oldFile[oldFile.length - 1]);
+                }
+                args = args.substring(0, args.length - 1);
+                await connection.execute(`DELETE FROM projectCommercialsImages WHERE imageUrl IN (${args})`);
+            }
+        }
         res = result?.affectedRows ? {
             code: 204,
             message: `Project Commercial updated.`
@@ -358,19 +395,59 @@ exports.removeCommercialThumbnail = removeCommercialThumbnail;
 /**
  *
  * @param fastify
- * @param id
  * @param images (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
  *  code: number,
  *  message: string,
  * }
- **/
-const uploadProjectCommercialsImages = async (fastify, id, images) => {
+ */
+const uploadProjectCommercialsImages = async (fastify, images) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
         const imgs = [];
-        const [rows] = await connection.query('SELECT id FROM projectCommercials WHERE id=?', [id]);
+        for await (const i of images) {
+            if (i.type === 'file') {
+                (0, helpers_1.uploadImageFile)('projects/commercials', i);
+                imgs.push((0, helpers_1.formatImageUrl)('projects/commercials', i.filename));
+            }
+        }
+        res = {
+            code: 201,
+            message: `Project Commercials images uploaded.`,
+            imageUrls: imgs
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+};
+exports.uploadProjectCommercialsImages = uploadProjectCommercialsImages;
+/**
+ *
+ * @param fastify
+ * @param data {
+ *  id: string
+ *  urls: string[]
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ */
+const updateProjectCommercialsImages = async (fastify, data) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res = { code: 200, message: "OK." };
+    try {
+        const [rows] = await connection.query('SELECT id FROM projectCommercials WHERE id=?', [data.id]);
         if (!rows || rows.length === 0) {
             res = {
                 code: 400,
@@ -378,23 +455,17 @@ const uploadProjectCommercialsImages = async (fastify, id, images) => {
             };
             return;
         }
-        for await (const i of images) {
-            if (i.type === 'file') {
-                (0, helpers_1.uploadImageFile)('projects/commercials', i);
-                imgs.push((0, helpers_1.formatImageUrl)('projects/commercials', i.filename));
-            }
-        }
         let sql = "INSERT INTO projectCommercialsImages (projectCommercialId, imageUrl) VALUES ";
-        for (const i of imgs) {
-            sql += `(${id},'${i}'),`;
+        for (const i of data.urls) {
+            sql += `(${data.id},'${i}'),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
-            code: 201,
-            message: `Project Commercials images uploaded.`,
-            imageUrls: imgs
+            code: 204,
+            message: `Project Commercials images updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
@@ -412,7 +483,7 @@ const uploadProjectCommercialsImages = async (fastify, id, images) => {
         return res;
     }
 };
-exports.uploadProjectCommercialsImages = uploadProjectCommercialsImages;
+exports.updateProjectCommercialsImages = updateProjectCommercialsImages;
 /**
  *
  * @param fastify
