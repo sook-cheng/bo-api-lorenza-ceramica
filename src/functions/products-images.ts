@@ -55,6 +55,7 @@ export const uploadProductsImages = async (fastify: FastifyInstance, id: number,
             sql += `(${products[0].id},'${products[0].name}','${products[0].code || products[0].color}',${p.sequence},'${p.type}',${p.isMocked}),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
@@ -129,6 +130,7 @@ export const uploadMockedImages = async (fastify: FastifyInstance, id: number, i
             sql += `(${products[0].id},'${products[0].name}','${products[0].code || products[0].color}',${p.sequence},'${p.type}',${p.isMocked}),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {

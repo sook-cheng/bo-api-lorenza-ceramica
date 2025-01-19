@@ -169,7 +169,7 @@ export const createProductsSideNav = async (fastify: FastifyInstance, data: any)
         // }
 
         const [result] = await connection.execute('INSERT INTO productsSideNavs (name,path,tableName,sequence,mainSideNavId) VALUES (?,?,?,?,?)',
-            [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null]);
+            [data.name || null, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName || null, data.sequence || null, data.mainSideNavId || null]);
 
         if (data.subSideNavs && data.subSideNavs.length > 0 && result?.insertId) {
             await addSubProductsSideNavs(fastify, {
@@ -248,7 +248,7 @@ export const updateProductsSideNav = async (fastify: FastifyInstance, data: any)
             // }
 
             const [updated] = await connection.execute("UPDATE productsSideNavs SET name=?, path=?, tableName=?, sequence=?, mainSideNavId=? WHERE id=?",
-                [data.name, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName, data.sequence, data.mainSideNavId || null, data.id]);
+                [data.name || null, data.path || `/${data.name.replaceAll(' ', '-').toLowerCase()}`, data.tableName || null, data.sequence || null, data.mainSideNavId || null, data.id]);
 
             const [subs] = await connection.query('SELECT * FROM productsSideNavs WHERE mainSideNavId=?', [data.id]);
             let addSubs: any[] = [];
@@ -368,6 +368,7 @@ export const addSubProductsSideNavs = async (fastify: FastifyInstance, data: any
             sql += `('${sideNav.name}','${sideNav.path}','${sideNav.tableName}',${sideNav.sequence},${data.mainSideNavId}),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
 
         // Create sub-side navs

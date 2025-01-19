@@ -148,6 +148,7 @@ export const createFinishes = async (fastify: FastifyInstance, data: any) => {
             sql += `('${c.name}','${c.value}),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
 
         const [result] = await connection.execute(sql);
@@ -191,7 +192,7 @@ export const updateFinish = async (fastify: FastifyInstance, data: any) => {
 
     try {
         const [result] = await connection.execute('UPDATE finishes SET name=?, value=? WHERE id=?',
-            [data.name, data.value, data.id]);
+            [data.name || null, data.value || data.name || null, data.id]);
         res = result?.affectedRows > 0 ? {
             code: 204,
             message: `Finish updated.`

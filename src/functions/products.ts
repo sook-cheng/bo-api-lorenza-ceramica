@@ -53,6 +53,7 @@ export const addProduct = async (fastify: FastifyInstance, data: any) => {
         let sql = "INSERT INTO products (name,code,description,variation,color,size,finish,thickness) VALUES ";
         sql += `('${data.name}','${data.code}','${data.description}','${data.variation}','${data.color}','${sizeStr}','${finishStr}','${data.thickness}');`
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         // result
         // {
         //      fieldCount, affectedRows, insertId, info, serverStatus, warningStatus, changesRows
