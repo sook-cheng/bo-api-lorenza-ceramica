@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createInspiration, deleteInspiration, deleteInspirations, getAllInspirations, getInspirationDetailsById, getInspirationsImagesById, removeInspirationThumbnail, updateInspiration, uploadInspirationsImages, uploadInspirationThumbnail } from "../functions";
+import { createInspiration, deleteInspiration, deleteInspirations, getAllInspirations, getInspirationDetailsById, getInspirationsImagesById, removeInspirationThumbnail, updateInspiration, updateInspirationsImages, uploadInspirationsImages, uploadInspirationThumbnail } from "../functions";
 
 export async function inspirationsRoute(fastify: FastifyInstance) {
     fastify.get("/all-inspirations", async (request, reply) => {
@@ -45,11 +45,15 @@ export async function inspirationsRoute(fastify: FastifyInstance) {
         reply.code(result?.code!).send({ message: result?.message });
     });
 
-    fastify.post("/upload-inspirations-images/:id", async (request, reply) => {
-        const { id }: any = request.params;
+    fastify.post("/upload-inspirations-images", async (request, reply) => {
         const images = request.files({ limits: { fileSize: 10000000 } });
-        const result = await uploadInspirationsImages(fastify, id, images);
+        const result = await uploadInspirationsImages(fastify, images);
         reply.code(result?.code!).send({ message: result?.message, imageUrls: result?.imageUrls });
+    });
+
+    fastify.post("/update-inspirations-images", async (request, reply) => {
+        const result = await updateInspirationsImages(fastify, request.body);
+        reply.code(result?.code!).send({ message: result?.message });
     });
 
     fastify.get("/inspirations-images/:id", async (request, reply) => {

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { createProjectCommercial, deleteProjectCommercial, deleteProjectCommercials, getAllProjectCommercials, getProjectCommercialDetailsById, getProjectCommercialsImagesById, removeCommercialThumbnail, updateProjectCommercial, uploadCommercialThumbnail, uploadProjectCommercialsImages } from "../functions";
+import { createProjectCommercial, deleteProjectCommercial, deleteProjectCommercials, getAllProjectCommercials, getProjectCommercialDetailsById, getProjectCommercialsImagesById, removeCommercialThumbnail, updateProjectCommercial, updateProjectCommercialsImages, uploadCommercialThumbnail, uploadProjectCommercialsImages } from "../functions";
 
 export async function projectCommercialsRoute(fastify: FastifyInstance) {
     fastify.get("/all-project-commercials", async (request, reply) => {
@@ -45,11 +45,15 @@ export async function projectCommercialsRoute(fastify: FastifyInstance) {
         reply.code(result?.code!).send({ message: result?.message });
     });
 
-    fastify.post("/upload-project-commercials-images/:id", async (request, reply) => {
-        const { id }: any = request.params;
+    fastify.post("/upload-project-commercials-images", async (request, reply) => {
         const images = request.files({ limits: { fileSize: 10000000 } });
-        const result = await uploadProjectCommercialsImages(fastify, id, images);
+        const result = await uploadProjectCommercialsImages(fastify, images);
         reply.code(result?.code!).send({ message: result?.message, imageUrls: result?.imageUrls });
+    });
+
+    fastify.post("/update-project-commercials-images", async (request, reply) => {
+        const result = await updateProjectCommercialsImages(fastify, request.body);
+        reply.code(result?.code!).send({ message: result?.message });
     });
 
     fastify.get("/project-commercials-images/:id", async (request, reply) => {

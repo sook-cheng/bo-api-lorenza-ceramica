@@ -67,6 +67,7 @@ export const getInspirationDetailsById = async (fastify: FastifyInstance, id: nu
  *  description: string
  *  content: string
  *  path: string
+ *  imageUrls: string[]
  * }
  * @returns {
  *  code: number,
@@ -90,6 +91,17 @@ export const createInspiration = async (fastify: FastifyInstance, data: any) => 
 
         const [result] = await connection.execute('INSERT INTO inspirations (title,description,content,path) VALUES (?,?,?,?)',
             [data.title, data.description, data.content, data.path]);
+
+        if (data.imageUrls && data.imageUrls.length > 0) {
+            let sql = "INSERT INTO inspirationsImages (inspirationId, imageUrl) VALUES ";
+            for (const i of data.imageUrls) {
+                sql += `(${result?.insertId},'${i}'),`;
+            }
+            sql = sql.replaceAll("'null'", "null");
+            sql = sql.replaceAll("'undefined'", "null");
+            sql = sql.substring(0, sql.length - 1);
+            await connection.execute(sql);
+        }
 
         res = result?.insertId ? {
             code: 201,
@@ -122,6 +134,7 @@ export const createInspiration = async (fastify: FastifyInstance, data: any) => 
  *  description: string
  *  content: string
  *  path: string
+ *  imageUrls: string[]
  * }
  * @returns {
  *  code: number,
@@ -144,7 +157,36 @@ export const updateInspiration = async (fastify: FastifyInstance, data: any) => 
         }
 
         const [result] = await connection.execute('UPDATE inspirations SET title=?, description=?, content=?, path=? WHERE id=?',
-            [data.title, data.description, data.content, data.path, data.id]);
+            [data.title || null, data.description || null, data.content || null, data.path || null, data.id]);
+
+        if (data.imageUrls && data.imageUrls.length > 0) {
+            const [images] = await connection.query('SELECT imageUrl FROM inspirationsImages WHERE inspirationId=?', [data.id]);
+            const addedUrls: string[] = data.imageUrls.filter((x: string) => !images.find((y: any) => y.imageUrl === x));
+            const removeUrls: any[] = images.filter((x: any) => !data.imageUrls.find((y: string) => x.imageUrl === y));
+
+            if (addedUrls.length > 0) {
+                let sql = "INSERT INTO inspirationsImages (inspirationId, imageUrl) VALUES ";
+                for (const i of addedUrls) {
+                    sql += `(${result?.insertId},'${i}'),`;
+                }
+                sql = sql.replaceAll("'null'", "null");
+                sql = sql.replaceAll("'undefined'", "null");
+                sql = sql.substring(0, sql.length - 1);
+                await connection.execute(sql);
+            }
+
+            if (removeUrls.length > 0) {
+                let args = '';
+                for (const i of removeUrls) {
+                    args = args.concat(`${i.imageUrl},`);
+
+                    const oldFile = i.imageUrl.split('/');
+                    removeImageFile('inspirations', oldFile[oldFile.length - 1]);
+                }
+                args = args.substring(0, args.length - 1);
+                await connection.execute(`DELETE FROM inspirationsImages WHERE imageUrl IN (${args})`);
+            }
+        }
 
         res = result?.affectedRows ? {
             code: 204,
@@ -392,20 +434,63 @@ export const removeInspirationThumbnail = async (fastify: FastifyInstance, id: n
 /**
  * 
  * @param fastify 
- * @param id
  * @param images (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
  * @returns {
  *  code: number,
  *  message: string,
  * }
- **/
-export const uploadInspirationsImages = async (fastify: FastifyInstance, id: number, images: any) => {
+ */
+export const uploadInspirationsImages = async (fastify: FastifyInstance, images: any) => {
     const connection = await fastify['mysql'].getConnection();
     let res: { code: number, message: string, imageUrls?: string[] } = { code: 200, message: "OK." };
 
     try {
         const imgs: string[] = [];
-        const [rows] = await connection.query('SELECT id FROM inspirations WHERE id=?', [id]);
+
+        for await (const i of images) {
+            if (i.type === 'file') {
+                uploadImageFile('inspirations', i);
+                imgs.push(formatImageUrl('inspirations', i.filename));
+            }
+        }
+
+        res = {
+            code: 201,
+            message: `Inspirations images uploaded.`,
+            imageUrls: imgs
+        };
+    }
+    catch (err) {
+        console.error(err);
+        res = {
+            code: 500,
+            message: "Internal Server Error."
+        };
+    }
+    finally {
+        connection.release();
+        return res;
+    }
+}
+
+/**
+ * 
+ * @param fastify 
+ * @param data {
+ *  id: string
+ *  urls: string[]
+ * }
+ * @returns {
+ *  code: number,
+ *  message: string,
+ * }
+ */
+export const updateInspirationsImages = async (fastify: FastifyInstance, data: any) => {
+    const connection = await fastify['mysql'].getConnection();
+    let res: { code: number, message: string } = { code: 200, message: "OK." };
+
+    try {
+        const [rows] = await connection.query('SELECT id FROM inspirations WHERE id=?', [data.id]);
 
         if (!rows || rows.length === 0) {
             res = {
@@ -415,24 +500,17 @@ export const uploadInspirationsImages = async (fastify: FastifyInstance, id: num
             return;
         }
 
-        for await (const i of images) {
-            if (i.type === 'file') {
-                uploadImageFile('inspirations', i);
-                imgs.push(formatImageUrl('inspirations', i.filename));
-            }
-        }
-
         let sql = "INSERT INTO inspirationsImages (inspirationId, imageUrl) VALUES ";
-        for (const i of imgs) {
-            sql += `(${id},'${i}'),`;
+        for (const i of data.urls) {
+            sql += `(${data.id},'${i}'),`;
         }
         sql = sql.replaceAll("'null'", "null");
+        sql = sql.replaceAll("'undefined'", "null");
         sql = sql.substring(0, sql.length - 1);
         const [result] = await connection.execute(sql);
         res = result?.affectedRows > 0 ? {
-            code: 201,
-            message: `Inspirations images uploaded.`,
-            imageUrls: imgs
+            code: 204,
+            message: `Inspirations images updated.`
         } : {
             code: 500,
             message: "Internal Server Error."
