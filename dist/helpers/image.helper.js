@@ -19,7 +19,7 @@ const removeImageFile = (folder, filename) => {
 };
 exports.removeImageFile = removeImageFile;
 const formatImageUrl = (folder, filename) => {
-    return `https://lorenzaceramica.com/images/${folder}/${filename}`;
+    return encodeURI(`https://lorenzaceramica.com/images/${folder}/${filename}`);
 };
 exports.formatImageUrl = formatImageUrl;
 //# sourceMappingURL=image.helper.js.map

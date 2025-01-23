@@ -113,10 +113,10 @@ const modifyOurStoryImage = async (fastify, key, image) => {
         }
         if (rows[0].value) {
             const oldFile = rows[0].value.split('/');
-            (0, helpers_1.removeImageFile)('our-story', oldFile[oldFile.length - 1]);
+            (0, helpers_1.removeImageFile)('home/our-story', oldFile[oldFile.length - 1]);
         }
-        (0, helpers_1.uploadImageFile)('our-story', image);
-        const [result] = await connection.execute('UPDATE companyInformation SET value=? WHERE key=?', [(0, helpers_1.formatImageUrl)('our-story', image.filename), key || "OUR_STORY_IMG"]);
+        (0, helpers_1.uploadImageFile)('home/our-story', image);
+        const [result] = await connection.execute('UPDATE companyInformation SET value=? WHERE key=?', [(0, helpers_1.formatImageUrl)('home/our-story', image.filename), key || "OUR_STORY_IMG"]);
         res = result?.affectedRows > 0 ? {
             code: 201,
             message: `Our Story image uploaded.`
