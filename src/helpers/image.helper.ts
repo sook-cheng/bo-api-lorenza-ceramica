@@ -15,5 +15,5 @@ export const removeImageFile = (folder: string, filename: string) => {
 }
 
 export const formatImageUrl = (folder: string, filename: string) => {
-    return `https://lorenzaceramica.com/images/${folder}/${filename}`;
+    return encodeURI(`https://lorenzaceramica.com/images/${folder}/${filename}`);
 }

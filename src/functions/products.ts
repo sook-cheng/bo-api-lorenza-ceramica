@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import { removeProductsImages } from "./products-images";
 
 /**
  * 
@@ -14,6 +15,7 @@ import { FastifyInstance } from "fastify";
  *  thickness?: string
  *  tags: number[]
  *  categories: number[]
+ *  sequence?: number
  * }
  * @returns {
  *  code: number,
@@ -50,8 +52,8 @@ export const addProduct = async (fastify: FastifyInstance, data: any) => {
             finishStr = finishes[0].name;
         }
 
-        let sql = "INSERT INTO products (name,code,description,variation,color,size,finish,thickness) VALUES ";
-        sql += `('${data.name}','${data.code}','${data.description}','${data.variation}','${data.color}','${sizeStr}','${finishStr}','${data.thickness}');`
+        let sql = "INSERT INTO products (name,code,description,variation,color,size,finish,thickness,sequence) VALUES ";
+        sql += `('${data.name}','${data.code}','${data.description}','${data.variation}','${data.color}','${sizeStr}','${finishStr}','${data.thickness}',${data.sequence || null});`
         sql = sql.replaceAll("'null'", "null");
         sql = sql.replaceAll("'undefined'", "null");
         // result
@@ -323,6 +325,8 @@ export const removeTagsForProduct = async (fastify: FastifyInstance, data: any) 
  *  thickness?: string
  *  tags: number[]
  *  categories: number[]
+ *  sequence?: number
+ *  imageUrls?: string[]
  * }
  * @returns {
  *  code: number,
@@ -435,8 +439,15 @@ export const updateProduct = async (fastify: FastifyInstance, data: any) => {
             finishStr = finishes[0].name;
         }
 
-        const [result] = await connection.execute("UPDATE products SET description=?, variation=?, thickness=?, size=?, finish=? WHERE id=?",
-            [data.description || null, data.variation || null, data.thickness || null, sizeStr, finishStr, data.id]);
+        if (data.imageUrls && data.imageUrls.length > 0) {
+            await removeProductsImages(fastify, {
+                productId: data.id,
+                imageUrls: data.imageUrls,
+            })
+        }
+
+        const [result] = await connection.execute("UPDATE products SET description=?, variation=?, thickness=?, size=?, finish=?, sequence=? WHERE id=?",
+            [data.description || null, data.variation || null, data.thickness || null, sizeStr, finishStr, data.sequence || null, data.id]);
 
         res = result?.affectedRows > 0 ? {
             code: 204,
@@ -568,6 +579,7 @@ export const removeProducts = async (fastify: FastifyInstance, data: any) => {
  *  size?: string
  *  finish?: string
  *  thickness?: string
+ *  sequence?: number
  *  createdAt: Date
  *  updatedAt: Date
  *  images: string[]
@@ -623,6 +635,7 @@ export const getProducts = async (fastify: FastifyInstance) => {
                     color: x.color ?? '-',
                     finish: x.finish ?? '-',
                     thickness: x.thickness ?? '-',
+                    sequence: x.sequence ?? '-',
                     createdAt: x.createdAt ?? '-',
                     updatedAt: x.updatedAt ?? '-',
                     images: imgList,
@@ -656,6 +669,7 @@ export const getProducts = async (fastify: FastifyInstance) => {
  *  size?: number
  *  finish?: number
  *  thickness?: string
+ *  sequence?: number
  *  images: string[]
  *  mockedImages: string[]
  *  categories: number[] (id)
@@ -667,7 +681,7 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
     let value: any;
 
     try {
-        const [rows] = await connection.query(`SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish, p.createdAt, p.updatedAt FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish WHERE p.id =?;`, [id]);
+        const [rows] = await connection.query(`SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish, p.sequence, p.createdAt, p.updatedAt FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish WHERE p.id =?;`, [id]);
 
         const [images] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 0;`, [id]);
         const [mockedImages] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 1;`, [id]);
@@ -689,6 +703,7 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
             color: rows[0].color ?? '-',
             finish: rows[0].finish ?? '-',
             thickness: rows[0].thickness ?? '-',
+            sequence: rows[0].sequence ?? '-',
             createdAt: rows[0].createdAt ?? '-',
             updatedAt: rows[0].updatedAt ?? '-',
             images: imgList,
@@ -707,5 +722,5 @@ export const getProductDetailsById = async (fastify: FastifyInstance, id: number
 }
 
 export const formatImageUrl = (name: string, code: string, sequence: number, type: string) => {
-    return `https://lorenzaceramica.com/images/products/${name}/${code}-${sequence}.${type}`;
+    return encodeURI(`https://lorenzaceramica.com/images/products/${name}/${code}-${sequence}.${type}`);
 }

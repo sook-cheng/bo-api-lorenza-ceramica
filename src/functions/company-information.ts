@@ -119,13 +119,13 @@ export const modifyOurStoryImage = async (fastify: FastifyInstance, key: string,
 
         if (rows[0].value) {
             const oldFile = rows[0].value.split('/');
-            removeImageFile('our-story', oldFile[oldFile.length - 1]);
+            removeImageFile('home/our-story', oldFile[oldFile.length - 1]);
         }
 
-        uploadImageFile('our-story', image);
+        uploadImageFile('home/our-story', image);
 
         const [result] = await connection.execute('UPDATE companyInformation SET value=? WHERE key=?',
-            [formatImageUrl('our-story', image.filename), key || "OUR_STORY_IMG"]);
+            [formatImageUrl('home/our-story', image.filename), key || "OUR_STORY_IMG"]);
         res = result?.affectedRows > 0 ? {
             code: 201,
             message: `Our Story image uploaded.`
