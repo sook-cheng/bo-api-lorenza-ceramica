@@ -326,7 +326,7 @@ export const removeTagsForProduct = async (fastify: FastifyInstance, data: any) 
  *  tags: number[]
  *  categories: number[]
  *  sequence?: number
- *  imageUrls?: string[]
+ *  notDeletedImageUrls?: string[]
  * }
  * @returns {
  *  code: number,
@@ -426,6 +426,28 @@ export const updateProduct = async (fastify: FastifyInstance, data: any) => {
 
                 if (addTags.length > 0) await assignProductToTags(fastify, { productId: rows[0].id, tags: addTags });
                 if (deleteTags.length > 0) await removeTagsForProduct(fastify, { productId: rows[0].id, tags: deleteTags });
+
+                // Handle product images deletion
+                const [images] = await connection.query('SELECT * FROM productsImages WHERE productId=?', [rows[0].id]);
+
+                if (images && images.length > 0) {
+                    let deletedImageUrls: string[] = [];
+
+                    if ((!data.notDeletedImageUrls || data.notDeletedImageUrls?.length === 0)) {
+                        deletedImageUrls = images.map((x: any) => formatImageUrl(x.productName, x.productCode, x.sequence, x.type));
+                    }
+                    else {
+                        const temp = images.filter((x: any) => !data.notDeletedImageUrls.find((y: string) => y === formatImageUrl(x.productName, x.productCode, x.sequence, x.type)));
+                        deletedImageUrls = temp.map((x: any) => formatImageUrl(x.productName, x.productCode, x.sequence, x.type));
+                    }
+
+                    if (deletedImageUrls && deletedImageUrls.length > 0) {
+                        await removeProductsImages(fastify, {
+                            productId: rows[0].id,
+                            imageUrls: deletedImageUrls,
+                        })
+                    }
+                }
             }
         }
 
@@ -437,13 +459,6 @@ export const updateProduct = async (fastify: FastifyInstance, data: any) => {
         if (data.finish) {
             const [finishes] = await connection.query('SELECT name, value FROM finishes WHERE id=?', [data.finish]);
             finishStr = finishes[0].name;
-        }
-
-        if (data.imageUrls && data.imageUrls.length > 0) {
-            await removeProductsImages(fastify, {
-                productId: data.id,
-                imageUrls: data.imageUrls,
-            })
         }
 
         const [result] = await connection.execute("UPDATE products SET description=?, variation=?, thickness=?, size=?, finish=?, sequence=? WHERE id=?",
