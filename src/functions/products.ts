@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { removeProductsImages } from "./products-images";
+import { removeImageFile } from "../helpers";
 
 /**
  * 
@@ -499,6 +500,11 @@ export const removeProduct = async (fastify: FastifyInstance, id: number) => {
     let res: { code: number, message: string } = { code: 200, message: "OK." };
 
     try {
+        const [images] = await connection.query('SELECT * FROM productsImages WHERE productId=?', [id]);
+        for (const i of images) {
+            removeImageFile(`products/${i.productName}`, `${i.productCode}-${i.sequence}.${i.type}`);
+        }
+
         await connection.execute('DELETE FROM productsCategories WHERE productId=?', [id]);
         await connection.execute('DELETE FROM productsColors WHERE productId=?', [id]);
         await connection.execute('DELETE FROM productsFinishes WHERE productId=?', [id]);

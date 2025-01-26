@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatImageUrl = exports.getProductDetailsById = exports.getProducts = exports.removeProducts = exports.removeProduct = exports.updateProduct = exports.removeTagsForProduct = exports.removeCategoriesForProduct = exports.assignProductToTags = exports.assignProductToCategories = exports.addProduct = void 0;
 const products_images_1 = require("./products-images");
+const helpers_1 = require("../helpers");
 /**
  *
  * @param fastify
@@ -461,6 +462,10 @@ const removeProduct = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
+        const [images] = await connection.query('SELECT * FROM productsImages WHERE productId=?', [id]);
+        for (const i of images) {
+            (0, helpers_1.removeImageFile)(`products/${i.productName}`, `${i.productCode}-${i.sequence}.${i.type}`);
+        }
         await connection.execute('DELETE FROM productsCategories WHERE productId=?', [id]);
         await connection.execute('DELETE FROM productsColors WHERE productId=?', [id]);
         await connection.execute('DELETE FROM productsFinishes WHERE productId=?', [id]);
