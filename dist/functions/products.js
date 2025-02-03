@@ -12,6 +12,7 @@ const helpers_1 = require("../helpers");
  *  description?: string
  *  variation?: string
  *  color?: string
+ *  colorId?: number
  *  size?: number
  *  finish?: number
  *  thickness?: string
@@ -58,10 +59,8 @@ const addProduct = async (fastify, data) => {
         //      fieldCount, affectedRows, insertId, info, serverStatus, warningStatus, changesRows
         // }
         const [result] = await connection.execute(sql);
-        if (data.color) {
-            let cSql = "INSERT INTO productsColors (productId,colorId) ";
-            cSql += `SELECT ${result.insertId}, id FROM colors WHERE name = '${data.color}';`;
-            await connection.execute(cSql);
+        if (data.colorId) {
+            await connection.execute("INSERT INTO productsColors (productId,colorId) VALUES (?,?)", [result.insertId, data.colorId]);
         }
         if (data.size) {
             await connection.execute('INSERT INTO productsSizes (productId,sizeId) VALUES (?,?)', [result.insertId, data.size]);
@@ -301,6 +300,7 @@ exports.removeTagsForProduct = removeTagsForProduct;
  *  description?: string
  *  variation?: string
  *  color?: string
+ *  colorId?: number
  *  size?: number
  *  finish?: number
  *  thickness?: string
@@ -333,13 +333,26 @@ const updateProduct = async (fastify, data) => {
                         };
                         return;
                     }
-                    // Remove existing color
-                    await connection.execute('DELETE FROM productsColors WHERE productId=? AND colorId IN (SELECT id FROM colors WHERE name=?)', [rows[0].id, rows[0].color || null]);
-                    // Insert new color
-                    let cSql = "INSERT INTO productsColors (productId,colorId) ";
-                    cSql += `SELECT ${data.id}, id FROM colors WHERE name = '${data.color}';`;
-                    await connection.execute(cSql);
                     await connection.execute("UPDATE products SET color=? WHERE id=?", [data.color || null, data.id]);
+                }
+                const [colors] = await connection.query("SELECT colorId FROM productsColors WHERE productId=?", [data.id]);
+                if (data.colorId) {
+                    if (colors && colors.length > 0) {
+                        if (data.colorId !== colors[0].colorId) {
+                            // Remove existing color
+                            await connection.execute('DELETE FROM productsColors WHERE productId=?', [rows[0].id]);
+                        }
+                    }
+                    else {
+                        // Insert new color
+                        await connection.execute('INSERT INTO productsColors (productId,colorId) VALUES (?,?)', [data.id, data.colorId]);
+                    }
+                }
+                else if (!data.colorId) {
+                    if (colors && colors.length > 0) {
+                        // Remove existing color
+                        await connection.execute('DELETE FROM productsColors WHERE productId=?', [rows[0].id]);
+                    }
                 }
                 if (data.size && data.size !== rows[0].size) {
                     // Remove existing size
@@ -347,11 +360,19 @@ const updateProduct = async (fastify, data) => {
                     // Insert new size
                     await connection.execute('INSERT INTO productsSizes (productId,sizeId) VALUES (?,?)', [data.id, data.size]);
                 }
+                else if (!data.size && rows[0].size) {
+                    // Remove existing size
+                    await connection.execute('DELETE FROM productsSizes WHERE productId=? AND sizeId=?', [rows[0].id, rows[0].size]);
+                }
                 if (data.finish && data.finish !== rows[0].finish) {
                     // Remove existing finish
                     await connection.execute('DELETE FROM productsFinishes WHERE productId=? AND finishId=?', [rows[0].id, rows[0].finish]);
                     // Insert new finish
                     await connection.execute('INSERT INTO productsFinishes (productId,finishId) VALUES (?,?)', [data.id, data.finish]);
+                }
+                else if (!data.finish && rows[0].finish) {
+                    // Remove existing finish
+                    await connection.execute('DELETE FROM productsFinishes WHERE productId=? AND finishId=?', [rows[0].id, rows[0].finish]);
                 }
                 // Remove and assign categories
                 const [categories] = await connection.query('SELECT categoryId FROM productsCategories WHERE productId=?', [rows[0].id]);
@@ -552,6 +573,7 @@ exports.removeProducts = removeProducts;
  *  description?: string
  *  variation?: string
  *  color?: string
+ *  colorId?: number
  *  size?: string
  *  finish?: string
  *  thickness?: string
@@ -576,7 +598,7 @@ const getProducts = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value = [];
     try {
-        const [rows] = await connection.execute('SELECT DISTINCT * FROM products ORDER BY updatedAt DESC;');
+        const [rows] = await connection.execute('SELECT DISTINCT p.*, pc.colorId FROM products p LEFT JOIN productsColors pc ON pc.productId = p.id ORDER BY p.updatedAt DESC;');
         if (rows.length > 0) {
             const productIds = rows.map((x) => x.id);
             let args = '';
@@ -600,16 +622,17 @@ const getProducts = async (fastify) => {
                 return {
                     id: x.id,
                     name: x.name,
-                    code: x.code ?? '-',
+                    code: x.code,
                     description: x.description,
-                    size: x.size ?? '-',
-                    variation: x.variation ?? '-',
-                    color: x.color ?? '-',
-                    finish: x.finish ?? '-',
-                    thickness: x.thickness ?? '-',
-                    sequence: x.sequence ?? '-',
-                    createdAt: x.createdAt ?? '-',
-                    updatedAt: x.updatedAt ?? '-',
+                    size: x.size,
+                    variation: x.variation,
+                    color: x.color,
+                    colorId: x.colorId,
+                    finish: x.finish,
+                    thickness: x.thickness,
+                    sequence: x.sequence,
+                    createdAt: x.createdAt,
+                    updatedAt: x.updatedAt,
                     images: imgList,
                     mockedImages: mockedImgList,
                     categories: categoryList,
@@ -652,7 +675,7 @@ const getProductDetailsById = async (fastify, id) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query(`SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, p.thickness, s.id AS size, f.id AS finish, p.sequence, p.createdAt, p.updatedAt FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish WHERE p.id =?;`, [id]);
+        const [rows] = await connection.query(`SELECT DISTINCT p.id, p.name, p.code, p.description, p.variation, p.color, pc.colorId, p.thickness, s.id AS size, f.id AS finish, p.sequence, p.createdAt, p.updatedAt FROM products p LEFT JOIN sizes s ON s.value = p.size LEFT JOIN finishes f ON f.name = p.finish LEFT JOIN productsColors pc ON pc.productId = p.id WHERE p.id =?;`, [id]);
         const [images] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 0;`, [id]);
         const [mockedImages] = await connection.query(`SELECT * FROM productsImages WHERE productId =? AND isMocked = 1;`, [id]);
         const [categories] = await connection.query(`SELECT pc.categoryId, pc.productId, c.name FROM productsCategories pc JOIN categories c ON c.id = pc.categoryId WHERE pc.productId =?;`, [id]);
@@ -664,16 +687,17 @@ const getProductDetailsById = async (fastify, id) => {
         value = {
             id: rows[0].id,
             name: rows[0].name,
-            code: rows[0].code ?? '-',
+            code: rows[0].code,
             description: rows[0].description,
-            size: rows[0].size ?? '-',
-            variation: rows[0].variation ?? '-',
-            color: rows[0].color ?? '-',
-            finish: rows[0].finish ?? '-',
-            thickness: rows[0].thickness ?? '-',
-            sequence: rows[0].sequence ?? '-',
-            createdAt: rows[0].createdAt ?? '-',
-            updatedAt: rows[0].updatedAt ?? '-',
+            size: rows[0].size,
+            variation: rows[0].variation,
+            color: rows[0].color,
+            colorId: rows[0].colorId,
+            finish: rows[0].finish,
+            thickness: rows[0].thickness,
+            sequence: rows[0].sequence,
+            createdAt: rows[0].createdAt,
+            updatedAt: rows[0].updatedAt,
             images: imgList,
             mockedImages: mockedImgList,
             categories: categoryList,
