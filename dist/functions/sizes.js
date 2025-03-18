@@ -40,7 +40,7 @@ const getSizesNotInMenu = async (fastify) => {
     const connection = await fastify['mysql'].getConnection();
     let value;
     try {
-        const [rows] = await connection.query('SELECT * FROM sizes WHERE name NOT IN (SELECT name FROM productsSideNavs WHERE tableName=? AND mainSideNavId IS NOT NULL) ORDER BY updatedAt DESC;', ['sizes']);
+        const [rows] = await connection.query('SELECT * FROM sizes WHERE value NOT IN (SELECT name FROM productsSideNavs WHERE tableName=? AND mainSideNavId IS NOT NULL) ORDER BY updatedAt DESC;', ['sizes']);
         value = rows;
     }
     finally {
