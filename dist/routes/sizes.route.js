@@ -6,6 +6,9 @@ async function sizesRoute(fastify) {
     fastify.get("/all-sizes", async (request, reply) => {
         return await (0, functions_1.getAllSizes)(fastify);
     });
+    fastify.get("/sizes-no-sub", async (request, reply) => {
+        return await (0, functions_1.getSizesNotInMenu)(fastify);
+    });
     fastify.get("/size-details/:id", async (request, reply) => {
         const { id } = request.params;
         return await (0, functions_1.getSizeDetailsById)(fastify, id);

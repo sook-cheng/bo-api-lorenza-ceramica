@@ -269,9 +269,9 @@ export const removeCategoriesForProduct = async (fastify: FastifyInstance, data:
  *  tags: number[]
  * }
  * @returns {
-*  code: number,
-*  message: string,
-* }
+ *  code: number,
+ *  message: string,
+ * }
 */
 export const removeTagsForProduct = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
@@ -563,9 +563,9 @@ export const removeProduct = async (fastify: FastifyInstance, id: number) => {
  *  products: number[]
  * }
  * @returns {
-*  code: number,
-*  message: string,
-* }
+ *  code: number,
+ *  message: string,
+ * }
 */
 export const removeProducts = async (fastify: FastifyInstance, data: any) => {
     const connection = await fastify['mysql'].getConnection();
@@ -710,6 +710,7 @@ export const getProducts = async (fastify: FastifyInstance) => {
  *  description?: string
  *  variation?: string
  *  color?: string
+ *  colorId?: number
  *  size?: number
  *  finish?: number
  *  thickness?: string

@@ -6,6 +6,9 @@ async function finishesRoute(fastify) {
     fastify.get("/all-finishes", async (request, reply) => {
         return await (0, functions_1.getAllFinishes)(fastify);
     });
+    fastify.get("/finishes-no-sub", async (request, reply) => {
+        return await (0, functions_1.getFinishesNotInMenu)(fastify);
+    });
     fastify.get("/finish-details/:id", async (request, reply) => {
         const { id } = request.params;
         return await (0, functions_1.getFinishDetailsById)(fastify, id);

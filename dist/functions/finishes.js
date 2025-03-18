@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeProductsFromFinish = exports.deleteFinishes = exports.deleteFinish = exports.areProductsExistedUnderFinish = exports.updateFinish = exports.createFinishes = exports.createFinish = exports.getFinishDetailsById = exports.getAllFinishes = void 0;
+exports.removeProductsFromFinish = exports.deleteFinishes = exports.deleteFinish = exports.areProductsExistedUnderFinish = exports.updateFinish = exports.createFinishes = exports.createFinish = exports.getFinishDetailsById = exports.getFinishesNotInMenu = exports.getAllFinishes = void 0;
 /**
  *
  * @param fastify
@@ -25,6 +25,30 @@ const getAllFinishes = async (fastify) => {
     }
 };
 exports.getAllFinishes = getAllFinishes;
+/**
+ *
+ * @param fastify
+ * @returns {
+*  id: number
+*  name: string
+*  value: string
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+const getFinishesNotInMenu = async (fastify) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value;
+    try {
+        const [rows] = await connection.query('SELECT * FROM finishes WHERE name NOT IN (SELECT name FROM productsSideNavs WHERE tableName=? AND mainSideNavId IS NOT NULL) ORDER BY updatedAt DESC;', ['finishes']);
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+};
+exports.getFinishesNotInMenu = getFinishesNotInMenu;
 /**
  *
  * @param fastify

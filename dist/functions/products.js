@@ -251,9 +251,9 @@ exports.removeCategoriesForProduct = removeCategoriesForProduct;
  *  tags: number[]
  * }
  * @returns {
-*  code: number,
-*  message: string,
-* }
+ *  code: number,
+ *  message: string,
+ * }
 */
 const removeTagsForProduct = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
@@ -522,9 +522,9 @@ exports.removeProduct = removeProduct;
  *  products: number[]
  * }
  * @returns {
-*  code: number,
-*  message: string,
-* }
+ *  code: number,
+ *  message: string,
+ * }
 */
 const removeProducts = async (fastify, data) => {
     const connection = await fastify['mysql'].getConnection();
@@ -661,6 +661,7 @@ exports.getProducts = getProducts;
  *  description?: string
  *  variation?: string
  *  color?: string
+ *  colorId?: number
  *  size?: number
  *  finish?: number
  *  thickness?: string

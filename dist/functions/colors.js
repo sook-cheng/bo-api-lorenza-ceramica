@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeProductsFromColor = exports.deleteColors = exports.deleteColor = exports.areProductsExistedUnderColor = exports.updateColor = exports.createColors = exports.createColor = exports.getColorDetailsById = exports.getAllColors = void 0;
+exports.removeProductsFromColor = exports.deleteColors = exports.deleteColor = exports.areProductsExistedUnderColor = exports.updateColor = exports.createColors = exports.createColor = exports.getColorDetailsById = exports.getColorsNotInMenu = exports.getAllColors = void 0;
 /**
  *
  * @param fastify
@@ -25,6 +25,30 @@ const getAllColors = async (fastify) => {
     }
 };
 exports.getAllColors = getAllColors;
+/**
+ *
+ * @param fastify
+ * @returns {
+*  id: number
+*  name: string
+*  value: string
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+const getColorsNotInMenu = async (fastify) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value;
+    try {
+        const [rows] = await connection.query('SELECT * FROM colors WHERE name NOT IN (SELECT name FROM productsSideNavs WHERE tableName=? AND mainSideNavId IS NOT NULL) ORDER BY updatedAt DESC;', ['colors']);
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+};
+exports.getColorsNotInMenu = getColorsNotInMenu;
 /**
  *
  * @param fastify

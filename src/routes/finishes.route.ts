@@ -1,9 +1,13 @@
 import { FastifyInstance } from "fastify";
-import { areProductsExistedUnderFinish, createFinish, createFinishes, deleteFinish, deleteFinishes, getAllFinishes, getFinishDetailsById, updateFinish } from "../functions";
+import { areProductsExistedUnderFinish, createFinish, createFinishes, deleteFinish, deleteFinishes, getAllFinishes, getFinishDetailsById, getFinishesNotInMenu, updateFinish } from "../functions";
 
 export async function finishesRoute(fastify: FastifyInstance) {
     fastify.get("/all-finishes", async (request, reply) => {
         return await getAllFinishes(fastify);
+    });
+
+    fastify.get("/finishes-no-sub", async (request, reply) => {
+        return await getFinishesNotInMenu(fastify);
     });
 
     fastify.get("/finish-details/:id", async (request, reply) => {

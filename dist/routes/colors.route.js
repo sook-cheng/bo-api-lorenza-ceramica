@@ -6,6 +6,9 @@ async function colorsRoute(fastify) {
     fastify.get("/all-colors", async (request, reply) => {
         return await (0, functions_1.getAllColors)(fastify);
     });
+    fastify.get("/colors-no-sub", async (request, reply) => {
+        return await (0, functions_1.getColorsNotInMenu)(fastify);
+    });
     fastify.get("/color-details/:id", async (request, reply) => {
         const { id } = request.params;
         return await (0, functions_1.getColorDetailsById)(fastify, id);

@@ -28,6 +28,31 @@ export const getAllSizes = async (fastify: FastifyInstance) => {
 /**
  * 
  * @param fastify 
+ * @returns {
+*  id: number
+*  name: string
+*  value: string
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+export const getSizesNotInMenu = async (fastify: FastifyInstance) => {
+   const connection = await fastify['mysql'].getConnection();
+   let value: any;
+
+   try {
+       const [rows] = await connection.query('SELECT * FROM sizes WHERE name NOT IN (SELECT name FROM productsSideNavs WHERE tableName=? AND mainSideNavId IS NOT NULL) ORDER BY updatedAt DESC;', ['sizes']);
+       value = rows;
+   }
+   finally {
+       connection.release();
+       return value;
+   }
+}
+
+/**
+ * 
+ * @param fastify 
  * @param id
  * @returns {
  *  id: number

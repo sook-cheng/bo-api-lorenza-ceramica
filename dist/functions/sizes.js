@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeProductsFromSize = exports.deleteSizes = exports.deleteSize = exports.areProductsExistedUnderSize = exports.updateSize = exports.createSizes = exports.createSize = exports.getSizeDetailsById = exports.getAllSizes = void 0;
+exports.removeProductsFromSize = exports.deleteSizes = exports.deleteSize = exports.areProductsExistedUnderSize = exports.updateSize = exports.createSizes = exports.createSize = exports.getSizeDetailsById = exports.getSizesNotInMenu = exports.getAllSizes = void 0;
 /**
  *
  * @param fastify
@@ -25,6 +25,30 @@ const getAllSizes = async (fastify) => {
     }
 };
 exports.getAllSizes = getAllSizes;
+/**
+ *
+ * @param fastify
+ * @returns {
+*  id: number
+*  name: string
+*  value: string
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+const getSizesNotInMenu = async (fastify) => {
+    const connection = await fastify['mysql'].getConnection();
+    let value;
+    try {
+        const [rows] = await connection.query('SELECT * FROM sizes WHERE name NOT IN (SELECT name FROM productsSideNavs WHERE tableName=? AND mainSideNavId IS NOT NULL) ORDER BY updatedAt DESC;', ['sizes']);
+        value = rows;
+    }
+    finally {
+        connection.release();
+        return value;
+    }
+};
+exports.getSizesNotInMenu = getSizesNotInMenu;
 /**
  *
  * @param fastify

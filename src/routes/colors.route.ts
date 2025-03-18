@@ -1,9 +1,13 @@
 import { FastifyInstance } from "fastify";
-import { areProductsExistedUnderColor, createColor, createColors, deleteColor, deleteColors, getAllColors, getColorDetailsById, updateColor } from "../functions";
+import { areProductsExistedUnderColor, createColor, createColors, deleteColor, deleteColors, getAllColors, getColorDetailsById, getColorsNotInMenu, updateColor } from "../functions";
 
 export async function colorsRoute(fastify: FastifyInstance) {
     fastify.get("/all-colors", async (request, reply) => {
         return await getAllColors(fastify);
+    });
+
+    fastify.get("/colors-no-sub", async (request, reply) => {
+        return await getColorsNotInMenu(fastify);
     });
 
     fastify.get("/color-details/:id", async (request, reply) => {

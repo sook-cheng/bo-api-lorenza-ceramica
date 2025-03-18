@@ -1,9 +1,13 @@
 import { FastifyInstance } from "fastify";
-import { areProductsExistedUnderSize, createSize, createSizes, deleteSize, deleteSizes, getAllSizes, getSizeDetailsById, updateSize } from "../functions";
+import { areProductsExistedUnderSize, createSize, createSizes, deleteSize, deleteSizes, getAllSizes, getSizeDetailsById, getSizesNotInMenu, updateSize } from "../functions";
 
 export async function sizesRoute(fastify: FastifyInstance) {
     fastify.get("/all-sizes", async (request, reply) => {
         return await getAllSizes(fastify);
+    });
+
+    fastify.get("/sizes-no-sub", async (request, reply) => {
+        return await getSizesNotInMenu(fastify);
     });
 
     fastify.get("/size-details/:id", async (request, reply) => {

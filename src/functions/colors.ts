@@ -28,6 +28,31 @@ export const getAllColors = async (fastify: FastifyInstance) => {
 /**
  * 
  * @param fastify 
+ * @returns {
+*  id: number
+*  name: string
+*  value: string
+*  createdAt: Date
+*  updatedAt: Date
+* }
+*/
+export const getColorsNotInMenu = async (fastify: FastifyInstance) => {
+   const connection = await fastify['mysql'].getConnection();
+   let value: any;
+
+   try {
+       const [rows] = await connection.query('SELECT * FROM colors WHERE name NOT IN (SELECT name FROM productsSideNavs WHERE tableName=? AND mainSideNavId IS NOT NULL) ORDER BY updatedAt DESC;', ['colors']);
+       value = rows;
+   }
+   finally {
+       connection.release();
+       return value;
+   }
+}
+
+/**
+ * 
+ * @param fastify 
  * @param id
  * @returns {
  *  id: number
