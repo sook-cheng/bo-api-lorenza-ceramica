@@ -11,6 +11,7 @@ const image_helper_1 = require("../helpers/image.helper");
 *  sequence: number
 *  link?: string
 *  imageUrl: string
+*  mobileImageUrl?: string
 *  createdAt: Date
 *  updatedAt: Date
 * }
@@ -38,6 +39,7 @@ exports.getAllHomeBanners = getAllHomeBanners;
 *  sequence: number
 *  link?: string
 *  imageUrl: string
+*  mobileImageUrl?: string
 *  createdAt: Date
 *  updatedAt: Date
 *  products: any[]
@@ -166,9 +168,9 @@ const uploadHomeBanner = async (fastify, id, image, type) => {
             const oldFile = rows[0].mobileImageUrl.split('/');
             (0, image_helper_1.removeImageFile)('home/banners', oldFile[oldFile.length - 1]);
         }
-        (0, image_helper_1.uploadImageFile)('home/banners', image);
+        (0, image_helper_1.uploadImageFile)('home/banners', image, `${image.filename}_${type}`);
         const sql = type === "normal" ? 'UPDATE homeBanners SET imageUrl=? WHERE id=?' : 'UPDATE homeBanners SET mobileImageUrl=? WHERE id=?';
-        const [result] = await connection.execute(sql, [(0, image_helper_1.formatImageUrl)('home/banners', image.filename), id]);
+        const [result] = await connection.execute(sql, [(0, image_helper_1.formatImageUrl)('home/banners', `${image.filename}_${type}`), id]);
         res = result?.affectedRows > 0 ? {
             code: 201,
             message: `Home banner uploaded.`

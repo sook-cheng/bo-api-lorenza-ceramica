@@ -10,6 +10,7 @@ import { formatImageUrl, removeImageFile, uploadImageFile } from "../helpers/ima
 *  sequence: number
 *  link?: string
 *  imageUrl: string
+*  mobileImageUrl?: string
 *  createdAt: Date
 *  updatedAt: Date
 * }
@@ -38,6 +39,7 @@ export const getAllHomeBanners = async (fastify: FastifyInstance) => {
 *  sequence: number
 *  link?: string
 *  imageUrl: string
+*  mobileImageUrl?: string
 *  createdAt: Date
 *  updatedAt: Date
 *  products: any[]
@@ -175,11 +177,11 @@ export const uploadHomeBanner = async (fastify: FastifyInstance, id: number, ima
             const oldFile = rows[0].mobileImageUrl.split('/');
             removeImageFile('home/banners', oldFile[oldFile.length - 1]);
         }
-        uploadImageFile('home/banners', image);
+        uploadImageFile('home/banners', image, `${image.filename}_${type}`);
 
         const sql = type === "normal" ? 'UPDATE homeBanners SET imageUrl=? WHERE id=?' : 'UPDATE homeBanners SET mobileImageUrl=? WHERE id=?';
         const [result] = await connection.execute(sql,
-            [formatImageUrl('home/banners', image.filename), id]);
+            [formatImageUrl('home/banners', `${image.filename}_${type}`), id]);
         
         res = result?.affectedRows > 0 ? {
             code: 201,
