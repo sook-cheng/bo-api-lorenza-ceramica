@@ -168,9 +168,11 @@ const uploadHomeBanner = async (fastify, id, image, type) => {
             const oldFile = rows[0].mobileImageUrl.split('/');
             (0, image_helper_1.removeImageFile)('home/banners', oldFile[oldFile.length - 1]);
         }
-        (0, image_helper_1.uploadImageFile)('home/banners', image, `${image.filename}_${type}`);
+        const names = image.filename.split('.');
+        const filename = `${names[0]}_${type}.${names[1]}`;
+        (0, image_helper_1.uploadImageFile)('home/banners', image, `${filename}`);
         const sql = type === "normal" ? 'UPDATE homeBanners SET imageUrl=? WHERE id=?' : 'UPDATE homeBanners SET mobileImageUrl=? WHERE id=?';
-        const [result] = await connection.execute(sql, [(0, image_helper_1.formatImageUrl)('home/banners', `${image.filename}_${type}`), id]);
+        const [result] = await connection.execute(sql, [(0, image_helper_1.formatImageUrl)('home/banners', `${filename}`), id]);
         res = result?.affectedRows > 0 ? {
             code: 201,
             message: `Home banner uploaded.`

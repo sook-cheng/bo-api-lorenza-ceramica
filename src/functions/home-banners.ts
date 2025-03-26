@@ -177,11 +177,14 @@ export const uploadHomeBanner = async (fastify: FastifyInstance, id: number, ima
             const oldFile = rows[0].mobileImageUrl.split('/');
             removeImageFile('home/banners', oldFile[oldFile.length - 1]);
         }
-        uploadImageFile('home/banners', image, `${image.filename}_${type}`);
+
+        const names = image.filename.split('.');
+        const filename = `${names[0]}_${type}.${names[1]}`;
+        uploadImageFile('home/banners', image, `${filename}`);
 
         const sql = type === "normal" ? 'UPDATE homeBanners SET imageUrl=? WHERE id=?' : 'UPDATE homeBanners SET mobileImageUrl=? WHERE id=?';
         const [result] = await connection.execute(sql,
-            [formatImageUrl('home/banners', `${image.filename}_${type}`), id]);
+            [formatImageUrl('home/banners', `${filename}`), id]);
         
         res = result?.affectedRows > 0 ? {
             code: 201,
