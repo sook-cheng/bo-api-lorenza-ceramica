@@ -22,10 +22,10 @@ async function homeBannersRoute(fastify) {
         const result = await (0, functions_1.deleteHomeBanners)(fastify, request.body);
         reply.code(result?.code).send({ message: result?.message });
     });
-    fastify.post("/upload-home-banner/:id", async (request, reply) => {
-        const { id } = request.params;
+    fastify.post("/upload-home-banner/:id/:type", async (request, reply) => {
+        const { id, type } = request.params;
         const image = await request.file({ limits: { fileSize: 10000000 } });
-        const result = await (0, functions_1.uploadHomeBanner)(fastify, id, image);
+        const result = await (0, functions_1.uploadHomeBanner)(fastify, id, image, type);
         reply.code(result?.code).send({ message: result?.message });
     });
 }

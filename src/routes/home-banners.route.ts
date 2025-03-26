@@ -26,10 +26,10 @@ export async function homeBannersRoute(fastify: FastifyInstance) {
         reply.code(result?.code!).send({ message: result?.message });
     });
 
-    fastify.post("/upload-home-banner/:id", async (request, reply) => {
-        const { id }: any = request.params;
+    fastify.post("/upload-home-banner/:id/:type", async (request, reply) => {
+        const { id, type }: any = request.params;
         const image = await request.file({ limits: { fileSize: 10000000 } });
-        const result = await uploadHomeBanner(fastify, id, image);
+        const result = await uploadHomeBanner(fastify, id, image, type);
         reply.code(result?.code!).send({ message: result?.message });
     });
 }

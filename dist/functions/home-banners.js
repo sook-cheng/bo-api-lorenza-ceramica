@@ -140,12 +140,13 @@ exports.updateHomeBanner = updateHomeBanner;
  * @param fastify
  * @param id
  * @param image (AsyncIterableIterator<fastifyMultipart.MultipartFile>)
+ * @param type (normal/mobile)
  * @returns {
  *  code: number,
  *  message: string,
  * }
  */
-const uploadHomeBanner = async (fastify, id, image) => {
+const uploadHomeBanner = async (fastify, id, image, type) => {
     const connection = await fastify['mysql'].getConnection();
     let res = { code: 200, message: "OK." };
     try {
@@ -157,12 +158,17 @@ const uploadHomeBanner = async (fastify, id, image) => {
             };
             return;
         }
-        if (rows[0].imageUrl) {
+        if (type === "normal" && rows[0].imageUrl) {
             const oldFile = rows[0].imageUrl.split('/');
             (0, image_helper_1.removeImageFile)('home/banners', oldFile[oldFile.length - 1]);
         }
+        else if (type === "mobile" && rows[0].mobileImageUrl) {
+            const oldFile = rows[0].mobileImageUrl.split('/');
+            (0, image_helper_1.removeImageFile)('home/banners', oldFile[oldFile.length - 1]);
+        }
         (0, image_helper_1.uploadImageFile)('home/banners', image);
-        const [result] = await connection.execute('UPDATE homeBanners SET imageUrl=? WHERE id=?', [(0, image_helper_1.formatImageUrl)('home/banners', image.filename), id]);
+        const sql = type === "normal" ? 'UPDATE homeBanners SET imageUrl=? WHERE id=?' : 'UPDATE homeBanners SET mobileImageUrl=? WHERE id=?';
+        const [result] = await connection.execute(sql, [(0, image_helper_1.formatImageUrl)('home/banners', image.filename), id]);
         res = result?.affectedRows > 0 ? {
             code: 201,
             message: `Home banner uploaded.`
